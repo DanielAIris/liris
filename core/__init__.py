@@ -1,0 +1,1 @@
+"""Module principal des fonctionnalités techniques de base"""

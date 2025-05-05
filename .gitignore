@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+.env/
+
+# PyCharm files
+.idea/
+*.iml
+
+# Local configuration
+*.local.json
+*.local.py
+
+# Database
+*.db
+*.sqlite
+
+# Log files
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Compiled Qt resources
+*_rc.py

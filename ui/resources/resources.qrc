@@ -1,0 +1,46 @@
+<RCC>
+  <qresource prefix="/">
+    <!-- Icônes générales -->
+    <file>icons/app_icon.png</file>
+    <file>icons/refresh.png</file>
+    <file>icons/export.png</file>
+    <file>icons/import.png</file>
+    <file>icons/settings.png</file>
+    <file>icons/search.png</file>
+    <file>icons/delete.png</file>
+    <file>icons/save.png</file>
+    <file>icons/open.png</file>
+    <file>icons/new.png</file>
+    <file>icons/copy.png</file>
+    <file>icons/view.png</file>
+
+    <!-- Icônes de statut -->
+    <file>icons/success.png</file>
+    <file>icons/error.png</file>
+    <file>icons/warning.png</file>
+    <file>icons/info.png</file>
+    <file>icons/running.png</file>
+
+    <!-- Icônes des onglets/sections -->
+    <file>icons/brainstorming.png</file>
+    <file>icons/annotation.png</file>
+    <file>icons/dataset.png</file>
+    <file>icons/history.png</file>
+
+    <!-- Icônes des plateformes -->
+    <file>icons/chatgpt.png</file>
+    <file>icons/claude.png</file>
+    <file>icons/ai_platform.png</file>
+
+    <!-- Images/illustrations -->
+    <file>images/logo.png</file>
+    <file>images/welcome.png</file>
+
+    <!-- Styles et thèmes -->
+    <file>styles/dark_theme.qss</file>
+    <file>styles/light_theme.qss</file>
+
+    <!-- Polices personnalisées (optionnel) -->
+    <file>fonts/custom_font.ttf</file>
+  </qresource>
+</RCC>

@@ -1,0 +1,1 @@
+"""Module pour l'interaction avec le système"""

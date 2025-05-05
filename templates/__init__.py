@@ -1,0 +1,1 @@
+"""Templates de prompts pour l'application"""

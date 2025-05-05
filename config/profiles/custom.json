@@ -1,0 +1,60 @@
+{
+    "name": "Custom AI Platform",
+    "interface": {
+        "prompt_field": {
+            "type": "textarea",
+            "placeholder": "Entrez votre message ici...",
+            "detection": {
+                "method": "findContour",
+                "color_range": {
+                    "lower": [240, 240, 240],
+                    "upper": [255, 255, 255]
+                }
+            }
+        },
+        "submit_button": {
+            "type": "button",
+            "detection": {
+                "method": "findContour",
+                "color_range": {
+                    "lower": [50, 50, 50],
+                    "upper": [150, 150, 150]
+                }
+            }
+        },
+        "response_area": {
+            "type": "div",
+            "detection": {
+                "method": "findContour",
+                "color_range": {
+                    "lower": [245, 245, 245],
+                    "upper": [255, 255, 255]
+                }
+            }
+        },
+        "new_chat_button": {
+            "type": "button",
+            "detection": {
+                "method": "findContour",
+                "color_range": {
+                    "lower": [230, 230, 230],
+                    "upper": [255, 255, 255]
+                }
+            }
+        }
+    },
+    "limits": {
+        "tokens_per_prompt": 2000,
+        "prompts_per_day": 100,
+        "reset_time": "00:00:00",
+        "cooldown_period": 30
+    },
+    "error_detection": {
+        "patterns": [
+            "erreur",
+            "réessayez plus tard",
+            "limite atteinte",
+            "problème technique"
+        ]
+    }
+}
