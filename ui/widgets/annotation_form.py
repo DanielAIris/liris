@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import os
 from datetime import datetime
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -5,6 +8,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 
 from utils.logger import logger
 from utils.exceptions import AnnotationError
+from ui.localization.translator import tr
 
 
 class AnnotationForm(QtWidgets.QWidget):
@@ -205,14 +209,14 @@ class AnnotationForm(QtWidgets.QWidget):
         header_layout.addWidget(logo_label)
 
         # Titre
-        title_label = QtWidgets.QLabel("Annotation automatique par IA")
-        title_label.setStyleSheet(f"""
+        self.title_label = QtWidgets.QLabel(tr("annotation.title"))
+        self.title_label.setStyleSheet(f"""
             font-size: 24px;
             font-weight: bold;
             color: {self.primary_color};
             margin-left: 10px;
         """)
-        header_layout.addWidget(title_label)
+        header_layout.addWidget(self.title_label)
         header_layout.addStretch()
 
         main_layout.addLayout(header_layout)
@@ -230,54 +234,54 @@ class AnnotationForm(QtWidgets.QWidget):
         config_layout.setSpacing(15)
 
         # Groupe de configuration
-        config_group = QtWidgets.QGroupBox("Configuration")
-        config_form = QtWidgets.QFormLayout(config_group)
+        self.config_group = QtWidgets.QGroupBox(tr("annotation.configuration"))
+        config_form = QtWidgets.QFormLayout(self.config_group)
         config_form.setSpacing(10)
 
         # Sélection du type d'annotation
         self.annotation_type = QtWidgets.QComboBox()
-        self.annotation_type.addItem("Classification", "classification")
-        self.annotation_type.addItem("Étiquetage d'entités", "entity")
-        self.annotation_type.addItem("Sentiment", "sentiment")
-        self.annotation_type.addItem("Résumé", "summary")
-        self.annotation_type.addItem("Extraction de mots-clés", "keywords")
-        self.annotation_type.addItem("Personnalisé", "custom")
-        config_form.addRow("Type d'annotation:", self.annotation_type)
+        self.annotation_type.addItem(tr("annotation.classification"), "classification")
+        self.annotation_type.addItem(tr("annotation.entity_labeling"), "entity")
+        self.annotation_type.addItem(tr("annotation.sentiment"), "sentiment")
+        self.annotation_type.addItem(tr("annotation.summary"), "summary")
+        self.annotation_type.addItem(tr("annotation.keyword_extraction"), "keywords")
+        self.annotation_type.addItem(tr("annotation.custom"), "custom")
+        config_form.addRow(tr("annotation.type"), self.annotation_type)
 
         # Sélection de la plateforme
         self.platform_combo = QtWidgets.QComboBox()
-        self.platform_combo.setToolTip("Plateforme d'IA à utiliser")
-        config_form.addRow("Plateforme IA:", self.platform_combo)
+        self.platform_combo.setToolTip(tr("annotation.platform_tooltip"))
+        config_form.addRow(tr("annotation.platform"), self.platform_combo)
 
         # Directives d'annotation
-        label_directives = QtWidgets.QLabel("Directives d'annotation:")
-        label_directives.setStyleSheet("margin-top: 10px;")
-        config_form.addRow(label_directives)
+        self.label_directives = QtWidgets.QLabel(tr("annotation.guidelines"))
+        self.label_directives.setStyleSheet("margin-top: 10px;")
+        config_form.addRow(self.label_directives)
 
         self.guidelines_edit = QtWidgets.QTextEdit()
-        self.guidelines_edit.setPlaceholderText("Instructions spécifiques pour l'annotation...")
+        self.guidelines_edit.setPlaceholderText(tr("annotation.guidelines_placeholder"))
         self.guidelines_edit.setMaximumHeight(100)
         config_form.addWidget(self.guidelines_edit)
 
-        config_layout.addWidget(config_group)
+        config_layout.addWidget(self.config_group)
 
         # Groupe de données
-        data_group = QtWidgets.QGroupBox("Données à annoter")
-        data_layout = QtWidgets.QVBoxLayout(data_group)
+        self.data_group = QtWidgets.QGroupBox(tr("annotation.data_to_annotate"))
+        data_layout = QtWidgets.QVBoxLayout(self.data_group)
         data_layout.setSpacing(10)
 
         # Options d'entrée
         input_layout = QtWidgets.QHBoxLayout()
 
         self.data_source = QtWidgets.QComboBox()
-        self.data_source.addItem("Texte direct", "direct")
-        self.data_source.addItem("Fichier texte", "file")
-        self.data_source.addItem("Fichier JSON", "json")
-        self.data_source.addItem("Fichier CSV", "csv")
+        self.data_source.addItem(tr("annotation.direct_text"), "direct")
+        self.data_source.addItem(tr("annotation.text_file"), "file")
+        self.data_source.addItem(tr("annotation.json_file"), "json")
+        self.data_source.addItem(tr("annotation.csv_file"), "csv")
         self.data_source.currentIndexChanged.connect(self._on_data_source_changed)
         input_layout.addWidget(self.data_source)
 
-        self.load_button = QtWidgets.QPushButton("Charger")
+        self.load_button = QtWidgets.QPushButton(tr("annotation.load"))
         self.load_button.clicked.connect(self._on_load_data)
         input_layout.addWidget(self.load_button)
 
@@ -285,26 +289,26 @@ class AnnotationForm(QtWidgets.QWidget):
 
         # Zone de texte pour les données
         self.data_edit = QtWidgets.QTextEdit()
-        self.data_edit.setPlaceholderText("Entrez ou chargez le contenu à annoter...")
+        self.data_edit.setPlaceholderText(tr("annotation.data_placeholder"))
         data_layout.addWidget(self.data_edit)
 
-        config_layout.addWidget(data_group)
+        config_layout.addWidget(self.data_group)
 
         # Boutons d'action
         actions_layout = QtWidgets.QHBoxLayout()
         actions_layout.setSpacing(10)
 
-        self.annotate_button = QtWidgets.QPushButton("Annoter")
+        self.annotate_button = QtWidgets.QPushButton(tr("annotation.annotate"))
         self.annotate_button.setIcon(QtGui.QIcon())  # Ajouter une icône si disponible
         self.annotate_button.clicked.connect(self._on_annotate)
         actions_layout.addWidget(self.annotate_button)
 
-        self.stop_button = QtWidgets.QPushButton("Arrêter")
+        self.stop_button = QtWidgets.QPushButton(tr("annotation.stop"))
         self.stop_button.clicked.connect(self._on_stop)
         self.stop_button.setEnabled(False)
         actions_layout.addWidget(self.stop_button)
 
-        self.export_button = QtWidgets.QPushButton("Exporter")
+        self.export_button = QtWidgets.QPushButton(tr("annotation.export"))
         self.export_button.clicked.connect(self._on_export)
         self.export_button.setEnabled(False)
         actions_layout.addWidget(self.export_button)
@@ -318,15 +322,15 @@ class AnnotationForm(QtWidgets.QWidget):
         results_layout.setSpacing(15)
 
         # Titre des résultats
-        results_title = QtWidgets.QLabel("Résultats d'annotation")
-        results_title.setAlignment(Qt.AlignCenter)
-        results_title.setStyleSheet(f"""
+        self.results_title = QtWidgets.QLabel(tr("annotation.results"))
+        self.results_title.setAlignment(Qt.AlignCenter)
+        self.results_title.setStyleSheet(f"""
             font-weight: bold;
             font-size: 16px;
             color: {self.primary_color};
             margin-bottom: 10px;
         """)
-        results_layout.addWidget(results_title)
+        results_layout.addWidget(self.results_title)
 
         # Onglets de résultats
         self.results_tabs = QtWidgets.QTabWidget()
@@ -340,7 +344,7 @@ class AnnotationForm(QtWidgets.QWidget):
         self.results_text.setReadOnly(True)
         text_layout.addWidget(self.results_text)
 
-        self.results_tabs.addTab(text_tab, "Texte")
+        self.results_tabs.addTab(text_tab, tr("annotation.text"))
 
         # Onglet tableau
         table_tab = QtWidgets.QWidget()
@@ -348,13 +352,17 @@ class AnnotationForm(QtWidgets.QWidget):
 
         self.results_table = QtWidgets.QTableWidget()
         self.results_table.setColumnCount(3)
-        self.results_table.setHorizontalHeaderLabels(["Type", "Texte", "Annotation"])
+        self.results_table.setHorizontalHeaderLabels([
+            tr("annotation.type"),
+            tr("annotation.text"),
+            tr("annotation.annotation")
+        ])
         self.results_table.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         self.results_table.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         self.results_table.horizontalHeader().setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         table_layout.addWidget(self.results_table)
 
-        self.results_tabs.addTab(table_tab, "Tableau")
+        self.results_tabs.addTab(table_tab, tr("annotation.table"))
 
         # Onglet JSON
         json_tab = QtWidgets.QWidget()
@@ -365,12 +373,12 @@ class AnnotationForm(QtWidgets.QWidget):
         self.results_json.setFont(QtGui.QFont("Courier New", 10))
         json_layout.addWidget(self.results_json)
 
-        self.results_tabs.addTab(json_tab, "JSON")
+        self.results_tabs.addTab(json_tab, tr("annotation.json"))
 
         # Statut
         status_layout = QtWidgets.QHBoxLayout()
 
-        self.status_label = QtWidgets.QLabel("Prêt")
+        self.status_label = QtWidgets.QLabel(tr("annotation.status_ready"))
         self.status_label.setStyleSheet(f"color: {self.primary_color}; font-weight: bold;")
         status_layout.addWidget(self.status_label, 1)
 
@@ -458,7 +466,7 @@ class AnnotationForm(QtWidgets.QWidget):
         self.current_task_id = None
 
         # Mettre à jour le statut
-        self.update_status("Nouvelle tâche d'annotation créée")
+        self.update_status(tr("annotation.new_task_created"))
 
         # Mettre à jour les boutons
         self.annotate_button.setEnabled(True)
@@ -477,8 +485,8 @@ class AnnotationForm(QtWidgets.QWidget):
             if not os.path.exists(file_path):
                 QtWidgets.QMessageBox.warning(
                     self,
-                    "Fichier introuvable",
-                    f"Le fichier {file_path} n'existe pas."
+                    tr("annotation.file_not_found"),
+                    tr("annotation.file_not_found_message", file=file_path)
                 )
                 return
 
@@ -516,7 +524,7 @@ class AnnotationForm(QtWidgets.QWidget):
                 self.data_edit.setPlainText(content)
 
             # Mettre à jour le statut
-            self.update_status(f"Fichier chargé: {os.path.basename(file_path)}")
+            self.update_status(tr("annotation.file_loaded", file=os.path.basename(file_path)))
 
         except Exception as e:
             logger.error(f"Erreur lors du chargement du fichier: {str(e)}")
@@ -524,8 +532,8 @@ class AnnotationForm(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur de chargement",
-                f"Impossible de charger le fichier:\n\n{str(e)}"
+                tr("annotation.load_error"),
+                tr("annotation.load_error_message", error=str(e))
             )
 
     def save_annotations(self):
@@ -534,17 +542,17 @@ class AnnotationForm(QtWidgets.QWidget):
         if self.results_text.toPlainText().strip() == "":
             QtWidgets.QMessageBox.warning(
                 self,
-                "Aucune annotation",
-                "Aucune annotation n'est disponible pour l'enregistrement."
+                tr("annotation.no_annotation"),
+                tr("annotation.no_annotation_message")
             )
             return
 
         # Ouvrir un sélecteur de fichier
         file_path, file_filter = QtWidgets.QFileDialog.getSaveFileName(
             self,
-            "Enregistrer les annotations",
+            tr("annotation.save_annotations"),
             os.path.expanduser("~/annotations.json"),
-            "Fichiers JSON (*.json);;Fichiers texte (*.txt);;Tous les fichiers (*.*)"
+            tr("annotation.save_dialog_filter")
         )
 
         if not file_path:
@@ -576,7 +584,7 @@ class AnnotationForm(QtWidgets.QWidget):
                     f.write(self.results_text.toPlainText())
 
             # Mettre à jour le statut
-            self.update_status(f"Annotations enregistrées dans {os.path.basename(file_path)}")
+            self.update_status(tr("annotation.saved", file=os.path.basename(file_path)))
 
         except Exception as e:
             logger.error(f"Erreur lors de l'enregistrement des annotations: {str(e)}")
@@ -584,8 +592,8 @@ class AnnotationForm(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur d'enregistrement",
-                f"Impossible d'enregistrer les annotations:\n\n{str(e)}"
+                tr("annotation.save_error"),
+                tr("annotation.save_error_message", error=str(e))
             )
 
     def export_annotations(self):
@@ -594,17 +602,17 @@ class AnnotationForm(QtWidgets.QWidget):
         if self.results_text.toPlainText().strip() == "":
             QtWidgets.QMessageBox.warning(
                 self,
-                "Aucune annotation",
-                "Aucune annotation n'est disponible pour l'exportation."
+                tr("annotation.no_annotation"),
+                tr("annotation.no_annotation_message")
             )
             return
 
         # Ouvrir un sélecteur de fichier
         file_path, file_filter = QtWidgets.QFileDialog.getSaveFileName(
             self,
-            "Exporter les annotations",
+            tr("annotation.export_annotations"),
             os.path.expanduser("~/annotations_export.json"),
-            "Fichiers JSON (*.json);;Fichiers CSV (*.csv);;Fichiers texte (*.txt);;Tous les fichiers (*.*)"
+            tr("annotation.export_dialog_filter")
         )
 
         if not file_path:
@@ -647,7 +655,7 @@ class AnnotationForm(QtWidgets.QWidget):
 
                 # Préparer les données du tableau
                 rows = []
-                headers = ["Type", "Texte", "Annotation"]
+                headers = [tr("annotation.type"), tr("annotation.text"), tr("annotation.annotation")]
 
                 # Ajouter les en-têtes
                 rows.append(headers)
@@ -669,21 +677,21 @@ class AnnotationForm(QtWidgets.QWidget):
                 # Exporter en texte
                 with open(file_path, 'w', encoding='utf-8') as f:
                     # Métadonnées
-                    f.write(f"TYPE D'ANNOTATION: {self.annotation_type.currentText()}\n")
-                    f.write(f"PLATEFORME: {self.platform_combo.currentText()}\n")
-                    f.write(f"DATE: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+                    f.write(f"{tr('annotation.type')}: {self.annotation_type.currentText()}\n")
+                    f.write(f"{tr('annotation.platform')}: {self.platform_combo.currentText()}\n")
+                    f.write(f"{tr('annotation.date')}: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
 
                     # Directives
                     guidelines = self.guidelines_edit.toPlainText()
                     if guidelines:
-                        f.write(f"DIRECTIVES:\n{guidelines}\n\n")
+                        f.write(f"{tr('annotation.guidelines')}:\n{guidelines}\n\n")
 
                     # Résultats
-                    f.write(f"RÉSULTATS:\n")
+                    f.write(f"{tr('annotation.results')}:\n")
                     f.write(self.results_text.toPlainText())
 
             # Mettre à jour le statut
-            self.update_status(f"Annotations exportées dans {os.path.basename(file_path)}")
+            self.update_status(tr("annotation.exported", file=os.path.basename(file_path)))
 
         except Exception as e:
             logger.error(f"Erreur lors de l'exportation des annotations: {str(e)}")
@@ -691,8 +699,8 @@ class AnnotationForm(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur d'exportation",
-                f"Impossible d'exporter les annotations:\n\n{str(e)}"
+                tr("annotation.export_error"),
+                tr("annotation.export_error_message", error=str(e))
             )
 
     def _on_data_source_changed(self, index):
@@ -708,22 +716,22 @@ class AnnotationForm(QtWidgets.QWidget):
         if source == "direct":
             # Texte direct
             self.data_edit.setReadOnly(False)
-            self.data_edit.setPlaceholderText("Entrez le contenu à annoter...")
+            self.data_edit.setPlaceholderText(tr("annotation.data_placeholder"))
             self.load_button.setEnabled(False)
         elif source == "file":
             # Fichier texte
             self.data_edit.setReadOnly(True)
-            self.data_edit.setPlaceholderText("Le contenu du fichier sera affiché ici...")
+            self.data_edit.setPlaceholderText(tr("annotation.file_content_placeholder"))
             self.load_button.setEnabled(True)
         elif source == "json":
             # Fichier JSON
             self.data_edit.setReadOnly(True)
-            self.data_edit.setPlaceholderText("Le contenu JSON sera affiché ici...")
+            self.data_edit.setPlaceholderText(tr("annotation.json_content_placeholder"))
             self.load_button.setEnabled(True)
         elif source == "csv":
             # Fichier CSV
             self.data_edit.setReadOnly(True)
-            self.data_edit.setPlaceholderText("Le contenu CSV sera affiché ici...")
+            self.data_edit.setPlaceholderText(tr("annotation.csv_content_placeholder"))
             self.load_button.setEnabled(True)
 
     def _on_load_data(self):
@@ -732,18 +740,18 @@ class AnnotationForm(QtWidgets.QWidget):
         source = self.data_source.currentData()
 
         if source == "file":
-            file_filter = "Fichiers texte (*.txt);;Tous les fichiers (*.*)"
+            file_filter = tr("annotation.text_file_filter")
         elif source == "json":
-            file_filter = "Fichiers JSON (*.json);;Tous les fichiers (*.*)"
+            file_filter = tr("annotation.json_file_filter")
         elif source == "csv":
-            file_filter = "Fichiers CSV (*.csv);;Tous les fichiers (*.*)"
+            file_filter = tr("annotation.csv_file_filter")
         else:
             return
 
         # Ouvrir un sélecteur de fichier
         file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
             self,
-            "Charger un fichier",
+            tr("annotation.load_file"),
             os.path.expanduser("~"),
             file_filter
         )
@@ -757,8 +765,8 @@ class AnnotationForm(QtWidgets.QWidget):
         if not self.conductor:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Système non disponible",
-                "Le système d'IA n'est pas initialisé correctement."
+                tr("annotation.system_unavailable"),
+                tr("annotation.system_init_error")
             )
             return
 
@@ -772,17 +780,16 @@ class AnnotationForm(QtWidgets.QWidget):
         if not data:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Données manquantes",
-                "Veuillez entrer ou charger des données à annoter."
+                tr("annotation.missing_data"),
+                tr("annotation.data_required")
             )
             return
 
         # Confirmation
         reply = QtWidgets.QMessageBox.question(
             self,
-            "Démarrer l'annotation",
-            f"Voulez-vous annoter ces données avec {platform} ?\n\n"
-            "Cette opération peut prendre quelques instants.",
+            tr("annotation.start_annotation"),
+            tr("annotation.start_confirmation", platform=platform),
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
             QtWidgets.QMessageBox.Yes
         )
@@ -792,7 +799,7 @@ class AnnotationForm(QtWidgets.QWidget):
 
         try:
             # Mettre à jour l'interface
-            self.update_status("Annotation en cours...", 10)
+            self.update_status(tr("annotation.in_progress"), 10)
             self.annotate_button.setEnabled(False)
             self.stop_button.setEnabled(True)
 
@@ -813,12 +820,12 @@ class AnnotationForm(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur de démarrage",
-                f"Impossible de démarrer l'annotation:\n\n{str(e)}"
+                tr("annotation.start_error"),
+                tr("annotation.start_error_message", error=str(e))
             )
 
             # Réinitialiser l'interface
-            self.update_status(f"Erreur: {str(e)}")
+            self.update_status(tr("annotation.error", error=str(e)))
             self.annotate_button.setEnabled(True)
             self.stop_button.setEnabled(False)
 
@@ -835,7 +842,7 @@ class AnnotationForm(QtWidgets.QWidget):
         """
         try:
             # Mise à jour du statut
-            self.update_status(f"Annotation en cours sur {platform}...", 30)
+            self.update_status(tr("annotation.running", platform=platform), 30)
 
             # Déterminer le mode d'annotation
             source_type = self.data_source.currentData()
@@ -885,14 +892,14 @@ class AnnotationForm(QtWidgets.QWidget):
                 return
 
             # Mettre à jour l'interface
-            self.update_status("Traitement des résultats...", 70)
+            self.update_status(tr("annotation.processing_results"), 70)
 
             # Traiter et afficher les résultats
             self._display_results(result)
 
             # Terminer
-            self.update_status("Annotation terminée", 100)
-            QtCore.QTimer.singleShot(1000, lambda: self.update_status("Annotation terminée"))
+            self.update_status(tr("annotation.completed"), 100)
+            QtCore.QTimer.singleShot(1000, lambda: self.update_status(tr("annotation.completed")))
 
             # Réactiver les contrôles
             self.annotate_button.setEnabled(True)
@@ -910,7 +917,7 @@ class AnnotationForm(QtWidgets.QWidget):
                 return
 
             # Mettre à jour le statut
-            self.update_status(f"Erreur: {str(e)}")
+            self.update_status(tr("annotation.error", error=str(e)))
 
             # Réactiver les contrôles
             self.annotate_button.setEnabled(True)
@@ -922,8 +929,8 @@ class AnnotationForm(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur d'annotation",
-                f"L'annotation a échoué:\n\n{str(e)}"
+                tr("annotation.annotation_error"),
+                tr("annotation.annotation_error_message", error=str(e))
             )
 
     def _build_annotation_prompt(self, annotation_type, guidelines, data):
@@ -938,37 +945,30 @@ class AnnotationForm(QtWidgets.QWidget):
         Returns:
             str: Prompt formaté
         """
-        prompt = f"TÂCHE D'ANNOTATION: {annotation_type}\n\n"
+        prompt = f"{tr('annotation.task')}: {annotation_type}\n\n"
 
         if guidelines:
-            prompt += f"DIRECTIVES:\n{guidelines}\n\n"
+            prompt += f"{tr('annotation.guidelines')}:\n{guidelines}\n\n"
 
         # Instructions selon le type
         if annotation_type == "classification":
-            prompt += "Instructions: Classifiez le texte suivant selon les directives. "
-            prompt += "Fournissez la classe attribuée et une justification.\n\n"
+            prompt += tr("annotation.classification_instructions") + "\n\n"
         elif annotation_type == "entity":
-            prompt += "Instructions: Identifiez et étiquetez les entités dans le texte suivant. "
-            prompt += "Listez chaque entité avec son type et sa position.\n\n"
+            prompt += tr("annotation.entity_instructions") + "\n\n"
         elif annotation_type == "sentiment":
-            prompt += "Instructions: Analysez le sentiment du texte suivant. "
-            prompt += "Indiquez s'il est positif, négatif ou neutre, avec une justification.\n\n"
+            prompt += tr("annotation.sentiment_instructions") + "\n\n"
         elif annotation_type == "summary":
-            prompt += "Instructions: Créez un résumé concis du texte suivant. "
-            prompt += "Capturez les points essentiels tout en restant fidèle au contenu original.\n\n"
+            prompt += tr("annotation.summary_instructions") + "\n\n"
         elif annotation_type == "keywords":
-            prompt += "Instructions: Extrayez les mots-clés du texte suivant. "
-            prompt += "Identifiez les termes et concepts les plus pertinents et significatifs.\n\n"
+            prompt += tr("annotation.keywords_instructions") + "\n\n"
         else:
-            prompt += "Instructions: Annotez le texte suivant selon les directives fournies.\n\n"
+            prompt += tr("annotation.custom_instructions") + "\n\n"
 
         # Format de sortie demandé
-        prompt += "Format requis: Fournissez votre réponse au format JSON avec des champs appropriés "
-        prompt += "pour le type d'annotation demandé. Incluez toujours un champ 'annotations' "
-        prompt += "et un champ 'metadata' avec des informations sur le processus d'annotation.\n\n"
+        prompt += tr("annotation.output_format") + "\n\n"
 
         # Données à annoter
-        prompt += "DONNÉES À ANNOTER:\n"
+        prompt += tr("annotation.data_header") + "\n"
         prompt += data
 
         return prompt
@@ -992,7 +992,7 @@ class AnnotationForm(QtWidgets.QWidget):
                 response = result
 
         if not response:
-            raise AnnotationError("Aucun résultat d'annotation valide")
+            raise AnnotationError(tr("annotation.no_valid_result"))
 
         # Mettre à jour l'onglet texte
         if isinstance(response, str):
@@ -1125,7 +1125,7 @@ class AnnotationForm(QtWidgets.QWidget):
         self.current_task_id = None
 
         # Mettre à jour l'interface
-        self.update_status("Annotation annulée")
+        self.update_status(tr("annotation.cancelled"))
         self.annotate_button.setEnabled(True)
         self.stop_button.setEnabled(False)
 
@@ -1149,3 +1149,60 @@ class AnnotationForm(QtWidgets.QWidget):
             return True
         except:
             return False
+
+    def update_language(self):
+        """Met à jour tous les textes après un changement de langue"""
+        # Mettre à jour le titre
+        self.title_label.setText(tr("annotation.title"))
+
+        # Mettre à jour les GroupBox
+        self.config_group.setTitle(tr("annotation.configuration"))
+        self.data_group.setTitle(tr("annotation.data_to_annotate"))
+
+        # Mettre à jour les boutons
+        self.annotate_button.setText(tr("annotation.annotate"))
+        self.stop_button.setText(tr("annotation.stop"))
+        self.export_button.setText(tr("annotation.export"))
+        self.load_button.setText(tr("annotation.load"))
+
+        # Mettre à jour les labels
+        self.label_directives.setText(tr("annotation.guidelines"))
+        self.results_title.setText(tr("annotation.results"))
+
+        # Mettre à jour les placeholders
+        self.guidelines_edit.setPlaceholderText(tr("annotation.guidelines_placeholder"))
+        self._on_data_source_changed(self.data_source.currentIndex())
+
+        # Mettre à jour les onglets
+        self.results_tabs.setTabText(0, tr("annotation.text"))
+        self.results_tabs.setTabText(1, tr("annotation.table"))
+        self.results_tabs.setTabText(2, tr("annotation.json"))
+
+        # Mettre à jour le statut
+        self.status_label.setText(tr("annotation.status_ready"))
+
+        # Mettre à jour les en-têtes du tableau
+        self.results_table.setHorizontalHeaderLabels([
+            tr("annotation.type"),
+            tr("annotation.text"),
+            tr("annotation.annotation")
+        ])
+
+        # Mettre à jour le combo des types d'annotation
+        current_index = self.annotation_type.currentIndex()
+        self.annotation_type.setItemText(0, tr("annotation.classification"))
+        self.annotation_type.setItemText(1, tr("annotation.entity_labeling"))
+        self.annotation_type.setItemText(2, tr("annotation.sentiment"))
+        self.annotation_type.setItemText(3, tr("annotation.summary"))
+        self.annotation_type.setItemText(4, tr("annotation.keyword_extraction"))
+        self.annotation_type.setItemText(5, tr("annotation.custom"))
+
+        # Mettre à jour le combo des sources de données
+        current_source_index = self.data_source.currentIndex()
+        self.data_source.setItemText(0, tr("annotation.direct_text"))
+        self.data_source.setItemText(1, tr("annotation.text_file"))
+        self.data_source.setItemText(2, tr("annotation.json_file"))
+        self.data_source.setItemText(3, tr("annotation.csv_file"))
+
+        # Mettre à jour le tooltip de la plateforme
+        self.platform_combo.setToolTip(tr("annotation.platform_tooltip"))

@@ -1,6 +1,10 @@
+# core/vision/recognizer.py
 import pytesseract
 import cv2
 import numpy as np
+import os
+import platform
+import subprocess
 from utils.logger import logger
 from utils.exceptions import OCRError
 
@@ -18,18 +22,66 @@ class TextRecognizer:
         Args:
             tesseract_path (str, optional): Chemin vers l'exécutable Tesseract
         """
+        # Configuration du chemin Tesseract
         if tesseract_path:
-            pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+            pytesseract.pytesseract.tesseract_cmd = tesseract_path
+        else:
+            # Essayer de détecter automatiquement Tesseract
+            self._setup_tesseract_path()
 
         logger.info("Initialisation du reconnaisseur de texte (Tesseract OCR)")
 
         # Vérifier que Tesseract est bien configuré
         try:
-            pytesseract.get_tesseract_version()
-            logger.info(f"Version de Tesseract: {pytesseract.get_tesseract_version()}")
+            version = pytesseract.get_tesseract_version()
+            logger.info(f"Version de Tesseract: {version}")
         except Exception as e:
             logger.error(f"Erreur lors de l'initialisation de Tesseract OCR: {str(e)}")
             logger.warning("La reconnaissance OCR pourrait ne pas fonctionner correctement")
+            logger.warning("Assurez-vous que Tesseract est installé et accessible dans le PATH")
+
+    def _setup_tesseract_path(self):
+        """
+        Configure automatiquement le chemin vers Tesseract OCR
+        """
+        # Chemins courants pour Tesseract
+        possible_paths = []
+
+        system = platform.system().lower()
+
+        if system == 'windows':
+            possible_paths = [
+                r'C:\Program Files\Tesseract-OCR\tesseract.exe',
+                r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe',
+                r'C:\Users\danie\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+            ]
+        elif system == 'darwin':  # macOS
+            possible_paths = [
+                '/usr/local/bin/tesseract',
+                '/opt/homebrew/bin/tesseract'
+            ]
+        else:  # Linux/Unix
+            possible_paths = [
+                '/usr/bin/tesseract',
+                '/usr/local/bin/tesseract'
+            ]
+
+        # Essayer de trouver Tesseract dans le PATH d'abord
+        try:
+            subprocess.run(['tesseract', '--version'], capture_output=True, check=True)
+            logger.info("Tesseract trouvé dans le PATH")
+            return
+        except:
+            pass
+
+        # Essayer les chemins possibles
+        for path in possible_paths:
+            if os.path.exists(path):
+                pytesseract.pytesseract.tesseract_cmd = path
+                logger.info(f"Tesseract trouvé à: {path}")
+                return
+
+        logger.warning("Tesseract non trouvé automatiquement. Assurez-vous qu'il est installé.")
 
     def recognize_text(self, image, roi=None):
         """
@@ -51,13 +103,16 @@ class TextRecognizer:
             # Prétraitement de l'image pour améliorer la reconnaissance
             preprocessed = self._preprocess_image(image)
 
+            # Configuration pour Tesseract
+            config = '--oem 3 --psm 11'  # Mode de segmentation automatique
+
             # Reconnaissance du texte
-            text = pytesseract.image_to_string(preprocessed, lang='fra+eng')
+            text = pytesseract.image_to_string(preprocessed, lang='fra+eng', config=config)
 
             # Nettoyage du texte
             text = text.strip()
 
-            logger.debug(f"Texte reconnu: {text}")
+            logger.debug(f"Texte reconnu: {text[:100]}..." if len(text) > 100 else f"Texte reconnu: {text}")
             return text
 
         except Exception as e:

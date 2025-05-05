@@ -1,9 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import os
 from datetime import datetime
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from utils.logger import logger
+from ui.localization.translator import tr
 
 
 class DatasetTable(QtWidgets.QWidget):
@@ -154,14 +158,14 @@ class DatasetTable(QtWidgets.QWidget):
         header_layout.addWidget(logo_label)
 
         # Titre
-        title_label = QtWidgets.QLabel("Gestion des Datasets")
-        title_label.setStyleSheet(f"""
+        self.title_label = QtWidgets.QLabel(tr("datasets.title"))
+        self.title_label.setStyleSheet(f"""
             font-size: 24px;
             font-weight: bold;
             color: {self.primary_color};
             margin-left: 10px;
         """)
-        header_layout.addWidget(title_label)
+        header_layout.addWidget(self.title_label)
         header_layout.addStretch()
 
         main_layout.addLayout(header_layout)
@@ -170,24 +174,24 @@ class DatasetTable(QtWidgets.QWidget):
         toolbar_layout = QtWidgets.QHBoxLayout()
         toolbar_layout.setSpacing(10)
 
-        self.refresh_button = QtWidgets.QPushButton("Actualiser")
+        self.refresh_button = QtWidgets.QPushButton(tr("datasets.refresh"))
         self.refresh_button.clicked.connect(self.refresh_list)
         toolbar_layout.addWidget(self.refresh_button)
 
-        self.new_button = QtWidgets.QPushButton("Nouveau dataset")
+        self.new_button = QtWidgets.QPushButton(tr("datasets.new_dataset"))
         self.new_button.clicked.connect(self.new_dataset)
         toolbar_layout.addWidget(self.new_button)
 
-        self.import_button = QtWidgets.QPushButton("Importer")
+        self.import_button = QtWidgets.QPushButton(tr("datasets.import"))
         self.import_button.clicked.connect(self._on_import)
         toolbar_layout.addWidget(self.import_button)
 
-        self.export_button = QtWidgets.QPushButton("Exporter")
+        self.export_button = QtWidgets.QPushButton(tr("datasets.export"))
         self.export_button.clicked.connect(self._on_export)
         self.export_button.setEnabled(False)
         toolbar_layout.addWidget(self.export_button)
 
-        self.delete_button = QtWidgets.QPushButton("Supprimer")
+        self.delete_button = QtWidgets.QPushButton(tr("datasets.delete"))
         self.delete_button.clicked.connect(self._on_delete)
         self.delete_button.setEnabled(False)
         toolbar_layout.addWidget(self.delete_button)
@@ -214,25 +218,25 @@ class DatasetTable(QtWidgets.QWidget):
         list_layout.setSpacing(15)
 
         # Titre
-        list_title = QtWidgets.QLabel("Datasets disponibles")
-        list_title.setAlignment(Qt.AlignCenter)
-        list_title.setStyleSheet(f"""
+        self.list_title = QtWidgets.QLabel(tr("datasets.available_datasets"))
+        self.list_title.setAlignment(Qt.AlignCenter)
+        self.list_title.setStyleSheet(f"""
             font-weight: bold;
             font-size: 16px;
             color: {self.primary_color};
             margin-bottom: 10px;
         """)
-        list_layout.addWidget(list_title)
+        list_layout.addWidget(self.list_title)
 
         # Filtre de recherche
         search_layout = QtWidgets.QHBoxLayout()
 
-        search_label = QtWidgets.QLabel("Rechercher:")
-        search_label.setStyleSheet("font-weight: bold;")
-        search_layout.addWidget(search_label)
+        self.search_label = QtWidgets.QLabel(tr("datasets.search"))
+        self.search_label.setStyleSheet("font-weight: bold;")
+        search_layout.addWidget(self.search_label)
 
         self.search_edit = QtWidgets.QLineEdit()
-        self.search_edit.setPlaceholderText("Filtrer par nom...")
+        self.search_edit.setPlaceholderText(tr("datasets.search_placeholder"))
         self.search_edit.textChanged.connect(self._on_search_changed)
         search_layout.addWidget(self.search_edit)
 
@@ -241,7 +245,11 @@ class DatasetTable(QtWidgets.QWidget):
         # Tableau des datasets
         self.datasets_table = QtWidgets.QTableWidget()
         self.datasets_table.setColumnCount(3)
-        self.datasets_table.setHorizontalHeaderLabels(["ID", "Nom", "Date"])
+        self.datasets_table.setHorizontalHeaderLabels([
+            tr("datasets.id"),
+            tr("datasets.name"),
+            tr("datasets.date")
+        ])
         self.datasets_table.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         self.datasets_table.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         self.datasets_table.horizontalHeader().setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
@@ -263,15 +271,15 @@ class DatasetTable(QtWidgets.QWidget):
         details_layout.setSpacing(15)
 
         # Titre
-        details_title = QtWidgets.QLabel("Détails du dataset")
-        details_title.setAlignment(Qt.AlignCenter)
-        details_title.setStyleSheet(f"""
+        self.details_title = QtWidgets.QLabel(tr("datasets.dataset_details"))
+        self.details_title.setAlignment(Qt.AlignCenter)
+        self.details_title.setStyleSheet(f"""
             font-weight: bold;
             font-size: 16px;
             color: {self.primary_color};
             margin-bottom: 10px;
         """)
-        details_layout.addWidget(details_title)
+        details_layout.addWidget(self.details_title)
 
         # Formulaire de détails
         details_form = QtWidgets.QFormLayout()
@@ -279,23 +287,23 @@ class DatasetTable(QtWidgets.QWidget):
 
         self.name_edit = QtWidgets.QLineEdit()
         self.name_edit.setReadOnly(True)
-        details_form.addRow("Nom:", self.name_edit)
+        details_form.addRow(tr("datasets.name_label"), self.name_edit)
 
         self.date_edit = QtWidgets.QLineEdit()
         self.date_edit.setReadOnly(True)
-        details_form.addRow("Date:", self.date_edit)
+        details_form.addRow(tr("datasets.date_label"), self.date_edit)
 
         self.size_edit = QtWidgets.QLineEdit()
         self.size_edit.setReadOnly(True)
-        details_form.addRow("Taille:", self.size_edit)
+        details_form.addRow(tr("datasets.size_label"), self.size_edit)
 
         self.format_edit = QtWidgets.QLineEdit()
         self.format_edit.setReadOnly(True)
-        details_form.addRow("Format:", self.format_edit)
+        details_form.addRow(tr("datasets.format_label"), self.format_edit)
 
-        description_label = QtWidgets.QLabel("Description:")
-        description_label.setStyleSheet("margin-top: 10px;")
-        details_form.addRow(description_label)
+        self.description_label = QtWidgets.QLabel(tr("datasets.description_label"))
+        self.description_label.setStyleSheet("margin-top: 10px;")
+        details_form.addRow(self.description_label)
 
         self.description_edit = QtWidgets.QTextEdit()
         self.description_edit.setReadOnly(True)
@@ -305,13 +313,13 @@ class DatasetTable(QtWidgets.QWidget):
         details_layout.addLayout(details_form)
 
         # Aperçu des données
-        preview_label = QtWidgets.QLabel("Aperçu des données")
-        preview_label.setStyleSheet(f"""
+        self.preview_label = QtWidgets.QLabel(tr("datasets.data_preview"))
+        self.preview_label.setStyleSheet(f"""
             font-weight: bold;
             color: {self.primary_color};
             margin-top: 15px;
         """)
-        details_layout.addWidget(preview_label)
+        details_layout.addWidget(self.preview_label)
 
         self.preview_edit = QtWidgets.QTextEdit()
         self.preview_edit.setReadOnly(True)
@@ -321,12 +329,12 @@ class DatasetTable(QtWidgets.QWidget):
         actions_layout = QtWidgets.QHBoxLayout()
         actions_layout.setSpacing(10)
 
-        self.view_button = QtWidgets.QPushButton("Voir les données")
+        self.view_button = QtWidgets.QPushButton(tr("datasets.view_data"))
         self.view_button.clicked.connect(self._on_view_data)
         self.view_button.setEnabled(False)
         actions_layout.addWidget(self.view_button)
 
-        self.edit_button = QtWidgets.QPushButton("Modifier")
+        self.edit_button = QtWidgets.QPushButton(tr("datasets.edit"))
         self.edit_button.clicked.connect(self._on_edit_dataset)
         self.edit_button.setEnabled(False)
         actions_layout.addWidget(self.edit_button)
@@ -343,7 +351,7 @@ class DatasetTable(QtWidgets.QWidget):
         # Statut
         status_layout = QtWidgets.QHBoxLayout()
 
-        self.status_label = QtWidgets.QLabel("Prêt")
+        self.status_label = QtWidgets.QLabel(tr("datasets.status_ready"))
         self.status_label.setStyleSheet(f"color: {self.primary_color}; font-weight: bold;")
         status_layout.addWidget(self.status_label)
 
@@ -380,7 +388,7 @@ class DatasetTable(QtWidgets.QWidget):
         """Actualise la liste des datasets"""
         # Vérifier la disponibilité de la base de données
         if not self.database:
-            self.update_status("Base de données non disponible")
+            self.update_status(tr("datasets.database_unavailable"))
             return
 
         try:
@@ -395,7 +403,7 @@ class DatasetTable(QtWidgets.QWidget):
             datasets = self.database.get_all_datasets()
 
             if not datasets:
-                self.update_status("Aucun dataset disponible")
+                self.update_status(tr("datasets.no_datasets"))
                 return
 
             # Filtre de recherche
@@ -435,11 +443,11 @@ class DatasetTable(QtWidgets.QWidget):
                 self.datasets_table.setItem(row, 2, date_item)
 
             # Mettre à jour le statut
-            self.update_status(f"{self.datasets_table.rowCount()} datasets affichés")
+            self.update_status(tr("datasets.datasets_displayed", count=self.datasets_table.rowCount()))
 
         except Exception as e:
             logger.error(f"Erreur lors de l'actualisation de la liste: {str(e)}")
-            self.update_status(f"Erreur: {str(e)}")
+            self.update_status(tr("datasets.error", error=str(e)))
 
     def _on_search_changed(self, text):
         """
@@ -533,13 +541,13 @@ class DatasetTable(QtWidgets.QWidget):
             size = dataset.get('size', 0)
             if size:
                 if size < 1024:
-                    size_str = f"{size} octets"
+                    size_str = tr("datasets.size_bytes", size=size)
                 elif size < 1024 * 1024:
-                    size_str = f"{size / 1024:.1f} Ko"
+                    size_str = tr("datasets.size_kb", size=size / 1024)
                 else:
-                    size_str = f"{size / (1024 * 1024):.1f} Mo"
+                    size_str = tr("datasets.size_mb", size=size / (1024 * 1024))
             else:
-                size_str = "Inconnu"
+                size_str = tr("datasets.size_unknown")
 
             self.size_edit.setText(size_str)
 
@@ -565,13 +573,13 @@ class DatasetTable(QtWidgets.QWidget):
                         import json
                         preview = json.dumps(data[:10], indent=2, ensure_ascii=False)
                         if len(data) > 10:
-                            preview += f"\n\n... ({len(data) - 10} éléments de plus)"
+                            preview += tr("datasets.preview_more", count=len(data) - 10)
 
             self.preview_edit.setPlainText(preview)
 
         except Exception as e:
             logger.error(f"Erreur lors du chargement des détails: {str(e)}")
-            self.update_status(f"Erreur: {str(e)}")
+            self.update_status(tr("datasets.error", error=str(e)))
 
     def new_dataset(self):
         """Crée un nouveau dataset"""
@@ -579,14 +587,14 @@ class DatasetTable(QtWidgets.QWidget):
         if not self.database:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Base de données non disponible",
-                "La base de données n'est pas disponible."
+                tr("datasets.database_unavailable"),
+                tr("datasets.database_unavailable_message")
             )
             return
 
         # Boîte de dialogue pour les informations du dataset
         dialog = QtWidgets.QDialog(self)
-        dialog.setWindowTitle("Nouveau dataset")
+        dialog.setWindowTitle(tr("datasets.new_dataset_title"))
         dialog.setMinimumWidth(400)
 
         # Style pour la dialog
@@ -619,26 +627,26 @@ class DatasetTable(QtWidgets.QWidget):
 
         # Nom
         name_edit = QtWidgets.QLineEdit()
-        form.addRow("Nom:", name_edit)
+        form.addRow(tr("datasets.name_label"), name_edit)
 
         # Description
         description_edit = QtWidgets.QTextEdit()
         description_edit.setMaximumHeight(100)
-        form.addRow("Description:", description_edit)
+        form.addRow(tr("datasets.description_label"), description_edit)
 
         # Format
         format_combo = QtWidgets.QComboBox()
         format_combo.addItem("JSON", "json")
         format_combo.addItem("CSV", "csv")
-        format_combo.addItem("Texte", "text")
-        form.addRow("Format:", format_combo)
+        format_combo.addItem(tr("datasets.text"), "text")
+        form.addRow(tr("datasets.format_label"), format_combo)
 
         # Données
-        data_label = QtWidgets.QLabel("Données:")
+        data_label = QtWidgets.QLabel(tr("datasets.data_label"))
         form.addRow(data_label)
 
         data_edit = QtWidgets.QTextEdit()
-        data_edit.setPlaceholderText("Entrez les données ou laissez vide pour créer un dataset vide")
+        data_edit.setPlaceholderText(tr("datasets.data_placeholder"))
         form.addWidget(data_edit)
 
         layout.addLayout(form)
@@ -665,8 +673,8 @@ class DatasetTable(QtWidgets.QWidget):
         if not name:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Nom manquant",
-                "Veuillez entrer un nom pour le dataset."
+                tr("datasets.missing_name"),
+                tr("datasets.missing_name_message")
             )
             return
 
@@ -680,7 +688,7 @@ class DatasetTable(QtWidgets.QWidget):
             )
 
             if not dataset_id:
-                raise Exception("Échec de la création du dataset")
+                raise Exception(tr("datasets.creation_failed"))
 
             # Mettre à jour la liste
             self.refresh_list()
@@ -689,7 +697,7 @@ class DatasetTable(QtWidgets.QWidget):
             self._select_dataset_by_id(dataset_id)
 
             # Mettre à jour le statut
-            self.update_status(f"Dataset {name} créé (ID: {dataset_id})")
+            self.update_status(tr("datasets.dataset_created", name=name, id=dataset_id))
 
             # Émettre le signal
             self.dataset_created.emit(dataset_id)
@@ -700,8 +708,8 @@ class DatasetTable(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur de création",
-                f"Impossible de créer le dataset:\n\n{str(e)}"
+                tr("datasets.creation_error"),
+                tr("datasets.creation_error_message", error=str(e))
             )
 
     def _select_dataset_by_id(self, dataset_id):
@@ -731,8 +739,8 @@ class DatasetTable(QtWidgets.QWidget):
         if not self.database:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Base de données non disponible",
-                "La base de données n'est pas disponible."
+                tr("datasets.database_unavailable"),
+                tr("datasets.database_unavailable_message")
             )
             return
 
@@ -740,9 +748,9 @@ class DatasetTable(QtWidgets.QWidget):
         if not file_path:
             file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
                 self,
-                "Importer un dataset",
+                tr("datasets.import_dataset"),
                 os.path.expanduser("~"),
-                "Tous les fichiers (*.*);;Fichiers JSON (*.json);;Fichiers CSV (*.csv);;Fichiers texte (*.txt)"
+                tr("datasets.import_file_filter")
             )
 
             if not file_path:
@@ -752,8 +760,8 @@ class DatasetTable(QtWidgets.QWidget):
         if not os.path.exists(file_path):
             QtWidgets.QMessageBox.warning(
                 self,
-                "Fichier introuvable",
-                f"Le fichier {file_path} n'existe pas."
+                tr("datasets.file_not_found"),
+                tr("datasets.file_not_found_message", file=file_path)
             )
             return
 
@@ -774,7 +782,7 @@ class DatasetTable(QtWidgets.QWidget):
 
             # Boîte de dialogue pour les informations supplémentaires
             dialog = QtWidgets.QDialog(self)
-            dialog.setWindowTitle("Importer un dataset")
+            dialog.setWindowTitle(tr("datasets.import_dataset_title"))
             dialog.setMinimumWidth(400)
 
             # Style pour la dialog
@@ -808,19 +816,19 @@ class DatasetTable(QtWidgets.QWidget):
             # Nom
             filename = os.path.basename(file_path)
             name_edit = QtWidgets.QLineEdit(os.path.splitext(filename)[0])
-            form.addRow("Nom:", name_edit)
+            form.addRow(tr("datasets.name_label"), name_edit)
 
             # Description
             description_edit = QtWidgets.QTextEdit()
             description_edit.setMaximumHeight(100)
-            description_edit.setPlaceholderText(f"Dataset importé depuis {filename}")
-            form.addRow("Description:", description_edit)
+            description_edit.setPlaceholderText(tr("datasets.import_description", file=filename))
+            form.addRow(tr("datasets.description_label"), description_edit)
 
             # Format
             format_combo = QtWidgets.QComboBox()
             format_combo.addItem("JSON", "json")
             format_combo.addItem("CSV", "csv")
-            format_combo.addItem("Texte", "text")
+            format_combo.addItem(tr("datasets.text"), "text")
 
             # Sélectionner le format détecté
             if format_type == "json":
@@ -830,7 +838,7 @@ class DatasetTable(QtWidgets.QWidget):
             else:
                 format_combo.setCurrentIndex(2)
 
-            form.addRow("Format:", format_combo)
+            form.addRow(tr("datasets.format_label"), format_combo)
 
             layout.addLayout(form)
 
@@ -855,8 +863,8 @@ class DatasetTable(QtWidgets.QWidget):
             if not name:
                 QtWidgets.QMessageBox.warning(
                     self,
-                    "Nom manquant",
-                    "Veuillez entrer un nom pour le dataset."
+                    tr("datasets.missing_name"),
+                    tr("datasets.missing_name_message")
                 )
                 return
 
@@ -870,7 +878,7 @@ class DatasetTable(QtWidgets.QWidget):
             )
 
             if not dataset_id:
-                raise Exception("Échec de l'importation du dataset")
+                raise Exception(tr("datasets.import_failed"))
 
             # Mettre à jour la liste
             self.refresh_list()
@@ -879,7 +887,7 @@ class DatasetTable(QtWidgets.QWidget):
             self._select_dataset_by_id(dataset_id)
 
             # Mettre à jour le statut
-            self.update_status(f"Dataset {name} importé (ID: {dataset_id})")
+            self.update_status(tr("datasets.dataset_imported", name=name, id=dataset_id))
 
             # Émettre le signal
             self.dataset_created.emit(dataset_id)
@@ -890,8 +898,8 @@ class DatasetTable(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur d'importation",
-                f"Impossible d'importer le dataset:\n\n{str(e)}"
+                tr("datasets.import_error"),
+                tr("datasets.import_error_message", error=str(e))
             )
 
     def export_dataset(self, dataset_id=None):
@@ -908,8 +916,8 @@ class DatasetTable(QtWidgets.QWidget):
         if not dataset_id:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Aucun dataset sélectionné",
-                "Veuillez sélectionner un dataset à exporter."
+                tr("datasets.no_dataset_selected"),
+                tr("datasets.no_dataset_selected_message")
             )
             return
 
@@ -917,8 +925,8 @@ class DatasetTable(QtWidgets.QWidget):
         if not self.database:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Base de données non disponible",
-                "La base de données n'est pas disponible."
+                tr("datasets.database_unavailable"),
+                tr("datasets.database_unavailable_message")
             )
             return
 
@@ -927,7 +935,7 @@ class DatasetTable(QtWidgets.QWidget):
             dataset = self.database.get_dataset(dataset_id)
 
             if not dataset:
-                raise Exception(f"Dataset {dataset_id} introuvable")
+                raise Exception(tr("datasets.dataset_not_found", id=dataset_id))
 
             # Déterminer le format par défaut
             format_type = dataset.get('format', 'text')
@@ -941,9 +949,9 @@ class DatasetTable(QtWidgets.QWidget):
             # Ouvrir un sélecteur de fichier
             file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
                 self,
-                "Exporter le dataset",
+                tr("datasets.export_dataset"),
                 os.path.expanduser(f"~/{dataset.get('name', 'dataset')}{default_ext}"),
-                "Tous les fichiers (*.*);;Fichiers JSON (*.json);;Fichiers CSV (*.csv);;Fichiers texte (*.txt)"
+                tr("datasets.export_file_filter")
             )
 
             if not file_path:
@@ -973,13 +981,15 @@ class DatasetTable(QtWidgets.QWidget):
                 # Vérifier si l'exportation a réussi
                 if exported_path and os.path.exists(exported_path):
                     # Mettre à jour le statut
-                    self.update_status(f"Dataset {dataset.get('name')} exporté vers {os.path.basename(exported_path)}")
+                    self.update_status(tr("datasets.dataset_exported",
+                                          name=dataset.get('name'),
+                                          file=os.path.basename(exported_path)))
 
                     # Message de confirmation
                     QtWidgets.QMessageBox.information(
                         self,
-                        "Exportation réussie",
-                        f"Le dataset a été exporté avec succès vers:\n{exported_path}"
+                        tr("datasets.export_successful"),
+                        tr("datasets.export_successful_message", file=exported_path)
                     )
 
                     return
@@ -1000,13 +1010,15 @@ class DatasetTable(QtWidgets.QWidget):
                     f.write(data)
 
             # Mettre à jour le statut
-            self.update_status(f"Dataset {dataset.get('name')} exporté vers {os.path.basename(file_path)}")
+            self.update_status(tr("datasets.dataset_exported",
+                                  name=dataset.get('name'),
+                                  file=os.path.basename(file_path)))
 
             # Message de confirmation
             QtWidgets.QMessageBox.information(
                 self,
-                "Exportation réussie",
-                f"Le dataset a été exporté avec succès vers:\n{file_path}"
+                tr("datasets.export_successful"),
+                tr("datasets.export_successful_message", file=file_path)
             )
 
         except Exception as e:
@@ -1015,8 +1027,8 @@ class DatasetTable(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur d'exportation",
-                f"Impossible d'exporter le dataset:\n\n{str(e)}"
+                tr("datasets.export_error"),
+                tr("datasets.export_error_message", error=str(e))
             )
 
     def export_current(self):
@@ -1040,9 +1052,8 @@ class DatasetTable(QtWidgets.QWidget):
         # Confirmation
         reply = QtWidgets.QMessageBox.question(
             self,
-            "Confirmer la suppression",
-            f"Êtes-vous sûr de vouloir supprimer le dataset '{self.name_edit.text()}' ?\n\n"
-            "Cette action est irréversible.",
+            tr("datasets.confirm_delete"),
+            tr("datasets.confirm_delete_message", name=self.name_edit.text()),
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
             QtWidgets.QMessageBox.No
         )
@@ -1055,7 +1066,7 @@ class DatasetTable(QtWidgets.QWidget):
             success = self.database.delete_dataset(self.current_dataset_id)
 
             if not success:
-                raise Exception(f"Échec de la suppression du dataset {self.current_dataset_id}")
+                raise Exception(tr("datasets.deletion_failed", id=self.current_dataset_id))
 
             # Émettre le signal
             dataset_id = self.current_dataset_id
@@ -1065,7 +1076,7 @@ class DatasetTable(QtWidgets.QWidget):
             self.refresh_list()
 
             # Mettre à jour le statut
-            self.update_status(f"Dataset {self.name_edit.text()} supprimé")
+            self.update_status(tr("datasets.dataset_deleted", name=self.name_edit.text()))
 
             # Effacer les détails
             self._clear_details()
@@ -1082,8 +1093,8 @@ class DatasetTable(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur de suppression",
-                f"Impossible de supprimer le dataset:\n\n{str(e)}"
+                tr("datasets.deletion_error"),
+                tr("datasets.deletion_error_message", error=str(e))
             )
 
     def _on_view_data(self):
@@ -1097,7 +1108,7 @@ class DatasetTable(QtWidgets.QWidget):
             dataset = self.database.get_dataset(self.current_dataset_id)
 
             if not dataset:
-                raise Exception(f"Dataset {self.current_dataset_id} introuvable")
+                raise Exception(tr("datasets.dataset_not_found", id=self.current_dataset_id))
 
             data = dataset.get('data', '')
             format_type = dataset.get('format', 'text')
@@ -1114,7 +1125,7 @@ class DatasetTable(QtWidgets.QWidget):
 
             # Créer une boîte de dialogue pour afficher les données
             dialog = QtWidgets.QDialog(self)
-            dialog.setWindowTitle(f"Données de {dataset.get('name', 'dataset')}")
+            dialog.setWindowTitle(tr("datasets.view_data_title", name=dataset.get('name', 'dataset')))
             dialog.resize(800, 600)
 
             # Style pour la dialog
@@ -1168,8 +1179,8 @@ class DatasetTable(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur d'affichage",
-                f"Impossible d'afficher les données du dataset:\n\n{str(e)}"
+                tr("datasets.view_error"),
+                tr("datasets.view_error_message", error=str(e))
             )
 
     def _on_edit_dataset(self):
@@ -1183,11 +1194,11 @@ class DatasetTable(QtWidgets.QWidget):
             dataset = self.database.get_dataset(self.current_dataset_id)
 
             if not dataset:
-                raise Exception(f"Dataset {self.current_dataset_id} introuvable")
+                raise Exception(tr("datasets.dataset_not_found", id=self.current_dataset_id))
 
             # Boîte de dialogue pour l'édition
             dialog = QtWidgets.QDialog(self)
-            dialog.setWindowTitle(f"Modifier {dataset.get('name', 'dataset')}")
+            dialog.setWindowTitle(tr("datasets.edit_dataset_title", name=dataset.get('name', 'dataset')))
             dialog.setMinimumWidth(500)
             dialog.resize(800, 600)
 
@@ -1221,18 +1232,18 @@ class DatasetTable(QtWidgets.QWidget):
 
             # Nom
             name_edit = QtWidgets.QLineEdit(dataset.get('name', ''))
-            form.addRow("Nom:", name_edit)
+            form.addRow(tr("datasets.name_label"), name_edit)
 
             # Description
             description_edit = QtWidgets.QTextEdit()
             description_edit.setPlainText(dataset.get('description', ''))
             description_edit.setMaximumHeight(100)
-            form.addRow("Description:", description_edit)
+            form.addRow(tr("datasets.description_label"), description_edit)
 
             layout.addLayout(form)
 
             # Données
-            data_label = QtWidgets.QLabel("Données:")
+            data_label = QtWidgets.QLabel(tr("datasets.data_label"))
             layout.addWidget(data_label)
 
             data_edit = QtWidgets.QTextEdit()
@@ -1266,8 +1277,8 @@ class DatasetTable(QtWidgets.QWidget):
             if not name:
                 QtWidgets.QMessageBox.warning(
                     self,
-                    "Nom manquant",
-                    "Veuillez entrer un nom pour le dataset."
+                    tr("datasets.missing_name"),
+                    tr("datasets.missing_name_message")
                 )
                 return
 
@@ -1280,14 +1291,14 @@ class DatasetTable(QtWidgets.QWidget):
             )
 
             if not success:
-                raise Exception(f"Échec de la mise à jour du dataset {self.current_dataset_id}")
+                raise Exception(tr("datasets.update_failed", id=self.current_dataset_id))
 
             # Mettre à jour l'interface
             self.refresh_list()
             self._select_dataset_by_id(self.current_dataset_id)
 
             # Mettre à jour le statut
-            self.update_status(f"Dataset {name} mis à jour")
+            self.update_status(tr("datasets.dataset_updated", name=name))
 
         except Exception as e:
             logger.error(f"Erreur lors de la modification du dataset: {str(e)}")
@@ -1295,8 +1306,8 @@ class DatasetTable(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur de modification",
-                f"Impossible de modifier le dataset:\n\n{str(e)}"
+                tr("datasets.edit_error"),
+                tr("datasets.edit_error_message", error=str(e))
             )
 
     def _on_dataset_double_clicked(self, row, column):
@@ -1309,3 +1320,41 @@ class DatasetTable(QtWidgets.QWidget):
         """
         # Simplement afficher les données complètes
         self._on_view_data()
+
+    def update_language(self):
+        """Met à jour tous les textes après un changement de langue"""
+        # Mettre à jour le titre
+        self.title_label.setText(tr("datasets.title"))
+
+        # Mettre à jour les boutons
+        self.refresh_button.setText(tr("datasets.refresh"))
+        self.new_button.setText(tr("datasets.new_dataset"))
+        self.import_button.setText(tr("datasets.import"))
+        self.export_button.setText(tr("datasets.export"))
+        self.delete_button.setText(tr("datasets.delete"))
+
+        # Mettre à jour les labels
+        self.list_title.setText(tr("datasets.available_datasets"))
+        self.search_label.setText(tr("datasets.search"))
+        self.search_edit.setPlaceholderText(tr("datasets.search_placeholder"))
+
+        # Mettre à jour les en-têtes du tableau
+        self.datasets_table.setHorizontalHeaderLabels([
+            tr("datasets.id"),
+            tr("datasets.name"),
+            tr("datasets.date")
+        ])
+
+        # Mettre à jour les titres des panneaux
+        self.details_title.setText(tr("datasets.dataset_details"))
+        self.preview_label.setText(tr("datasets.data_preview"))
+
+        # Mettre à jour les boutons d'action
+        self.view_button.setText(tr("datasets.view_data"))
+        self.edit_button.setText(tr("datasets.edit"))
+
+        # Mettre à jour le statut
+        self.status_label.setText(tr("datasets.status_ready"))
+
+        # Mettre à jour le label description
+        self.description_label.setText(tr("datasets.description_label"))

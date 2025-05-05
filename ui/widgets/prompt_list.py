@@ -1,9 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import os
 from datetime import datetime
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from utils.logger import logger
+from ui.localization.translator import tr
 
 
 class PromptList(QtWidgets.QWidget):
@@ -190,14 +194,14 @@ class PromptList(QtWidgets.QWidget):
         header_layout.addWidget(logo_label)
 
         # Titre
-        title_label = QtWidgets.QLabel("Historique des Prompts")
-        title_label.setStyleSheet(f"""
+        self.title_label = QtWidgets.QLabel(tr("history.title"))
+        self.title_label.setStyleSheet(f"""
             font-size: 24px;
             font-weight: bold;
             color: {self.primary_color};
             margin-left: 10px;
         """)
-        header_layout.addWidget(title_label)
+        header_layout.addWidget(self.title_label)
         header_layout.addStretch()
 
         main_layout.addLayout(header_layout)
@@ -206,51 +210,51 @@ class PromptList(QtWidgets.QWidget):
         toolbar_layout = QtWidgets.QHBoxLayout()
         toolbar_layout.setSpacing(10)
 
-        self.refresh_button = QtWidgets.QPushButton("Actualiser")
+        self.refresh_button = QtWidgets.QPushButton(tr("history.refresh"))
         self.refresh_button.clicked.connect(self.refresh_list)
         toolbar_layout.addWidget(self.refresh_button)
 
-        self.delete_button = QtWidgets.QPushButton("Supprimer")
+        self.delete_button = QtWidgets.QPushButton(tr("history.delete"))
         self.delete_button.clicked.connect(self._on_delete)
         self.delete_button.setEnabled(False)
         toolbar_layout.addWidget(self.delete_button)
 
-        self.export_button = QtWidgets.QPushButton("Exporter")
+        self.export_button = QtWidgets.QPushButton(tr("history.export"))
         self.export_button.clicked.connect(self._on_export)
         self.export_button.setEnabled(False)
         toolbar_layout.addWidget(self.export_button)
 
         # Filtre par plateforme
-        platform_label = QtWidgets.QLabel("Plateforme:")
-        platform_label.setStyleSheet("font-weight: bold;")
-        toolbar_layout.addWidget(platform_label)
+        self.platform_label = QtWidgets.QLabel(tr("history.platform"))
+        self.platform_label.setStyleSheet("font-weight: bold;")
+        toolbar_layout.addWidget(self.platform_label)
 
         self.platform_combo = QtWidgets.QComboBox()
-        self.platform_combo.addItem("Toutes", "")
+        self.platform_combo.addItem(tr("history.all"), "")
         self.platform_combo.currentIndexChanged.connect(self._on_filter_changed)
         toolbar_layout.addWidget(self.platform_combo)
 
         # Filtre par type
-        type_label = QtWidgets.QLabel("Type:")
-        type_label.setStyleSheet("font-weight: bold;")
-        toolbar_layout.addWidget(type_label)
+        self.type_label = QtWidgets.QLabel(tr("history.type"))
+        self.type_label.setStyleSheet("font-weight: bold;")
+        toolbar_layout.addWidget(self.type_label)
 
         self.type_combo = QtWidgets.QComboBox()
-        self.type_combo.addItem("Tous", "")
-        self.type_combo.addItem("Standard", "standard")
-        self.type_combo.addItem("Analyse", "analyze")
-        self.type_combo.addItem("Génération", "generate")
-        self.type_combo.addItem("Brainstorming", "brainstorm")
+        self.type_combo.addItem(tr("history.all"), "")
+        self.type_combo.addItem(tr("history.standard"), "standard")
+        self.type_combo.addItem(tr("history.analyze"), "analyze")
+        self.type_combo.addItem(tr("history.generate"), "generate")
+        self.type_combo.addItem(tr("history.brainstorm"), "brainstorm")
         self.type_combo.currentIndexChanged.connect(self._on_filter_changed)
         toolbar_layout.addWidget(self.type_combo)
 
         # Recherche
-        search_label = QtWidgets.QLabel("Rechercher:")
-        search_label.setStyleSheet("font-weight: bold;")
-        toolbar_layout.addWidget(search_label)
+        self.search_label = QtWidgets.QLabel(tr("history.search"))
+        self.search_label.setStyleSheet("font-weight: bold;")
+        toolbar_layout.addWidget(self.search_label)
 
         self.search_edit = QtWidgets.QLineEdit()
-        self.search_edit.setPlaceholderText("Filtrer par contenu...")
+        self.search_edit.setPlaceholderText(tr("history.search_placeholder"))
         self.search_edit.textChanged.connect(self._on_filter_changed)
         toolbar_layout.addWidget(self.search_edit)
 
@@ -277,7 +281,13 @@ class PromptList(QtWidgets.QWidget):
         # Tableau des prompts
         self.prompts_table = QtWidgets.QTableWidget()
         self.prompts_table.setColumnCount(5)
-        self.prompts_table.setHorizontalHeaderLabels(["ID", "Date", "Plateforme", "Type", "Contenu"])
+        self.prompts_table.setHorizontalHeaderLabels([
+            tr("history.id"),
+            tr("history.date"),
+            tr("history.platform"),
+            tr("history.type"),
+            tr("history.content")
+        ])
         self.prompts_table.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         self.prompts_table.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
         self.prompts_table.horizontalHeader().setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
@@ -311,7 +321,7 @@ class PromptList(QtWidgets.QWidget):
         self.prompt_edit.setReadOnly(True)
         prompt_layout.addWidget(self.prompt_edit)
 
-        self.detail_tabs.addTab(prompt_tab, "Prompt")
+        self.detail_tabs.addTab(prompt_tab, tr("history.prompt"))
 
         # Onglet réponse
         response_tab = QtWidgets.QWidget()
@@ -321,7 +331,7 @@ class PromptList(QtWidgets.QWidget):
         self.response_edit.setReadOnly(True)
         response_layout.addWidget(self.response_edit)
 
-        self.detail_tabs.addTab(response_tab, "Réponse")
+        self.detail_tabs.addTab(response_tab, tr("history.response"))
 
         # Onglet métadonnées
         metadata_tab = QtWidgets.QWidget()
@@ -329,13 +339,16 @@ class PromptList(QtWidgets.QWidget):
 
         self.metadata_table = QtWidgets.QTableWidget()
         self.metadata_table.setColumnCount(2)
-        self.metadata_table.setHorizontalHeaderLabels(["Propriété", "Valeur"])
+        self.metadata_table.setHorizontalHeaderLabels([
+            tr("history.property"),
+            tr("history.value")
+        ])
         self.metadata_table.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         self.metadata_table.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         self.metadata_table.verticalHeader().setVisible(False)
         metadata_layout.addWidget(self.metadata_table)
 
-        self.detail_tabs.addTab(metadata_tab, "Métadonnées")
+        self.detail_tabs.addTab(metadata_tab, tr("history.metadata"))
 
         detail_layout.addWidget(self.detail_tabs)
 
@@ -349,11 +362,11 @@ class PromptList(QtWidgets.QWidget):
         # Statut
         status_layout = QtWidgets.QHBoxLayout()
 
-        self.status_label = QtWidgets.QLabel("Prêt")
+        self.status_label = QtWidgets.QLabel(tr("history.status_ready"))
         self.status_label.setStyleSheet(f"color: {self.primary_color}; font-weight: bold;")
         status_layout.addWidget(self.status_label)
 
-        self.count_label = QtWidgets.QLabel("0 prompts")
+        self.count_label = QtWidgets.QLabel(tr("history.count", count=0))
         self.count_label.setAlignment(Qt.AlignRight)
         status_layout.addWidget(self.count_label)
 
@@ -381,7 +394,7 @@ class PromptList(QtWidgets.QWidget):
         """Actualise la liste des prompts"""
         # Vérifier la disponibilité de la base de données
         if not self.database:
-            self.update_status("Base de données non disponible")
+            self.update_status(tr("history.database_unavailable"))
             return
 
         try:
@@ -409,8 +422,8 @@ class PromptList(QtWidgets.QWidget):
             )
 
             if not prompts:
-                self.update_status("Aucun prompt trouvé")
-                self.count_label.setText("0 prompts")
+                self.update_status(tr("history.no_prompts_found"))
+                self.count_label.setText(tr("history.count", count=0))
                 return
 
             # Mettre à jour les plateformes disponibles
@@ -465,17 +478,12 @@ class PromptList(QtWidgets.QWidget):
 
             # Mettre à jour le statut
             count = self.prompts_table.rowCount()
-            self.update_status(f"{count} prompts affichés")
-
-            # Pluriel conditionnel
-            if count == 1:
-                self.count_label.setText("1 prompt")
-            else:
-                self.count_label.setText(f"{count} prompts")
+            self.update_status(tr("history.prompts_displayed", count=count))
+            self.count_label.setText(tr("history.count", count=count))
 
         except Exception as e:
             logger.error(f"Erreur lors de l'actualisation de la liste: {str(e)}")
-            self.update_status(f"Erreur: {str(e)}")
+            self.update_status(tr("history.error", error=str(e)))
 
     def _update_platforms(self, prompts):
         """
@@ -497,7 +505,7 @@ class PromptList(QtWidgets.QWidget):
 
         # Mettre à jour le combo
         self.platform_combo.clear()
-        self.platform_combo.addItem("Toutes", "")
+        self.platform_combo.addItem(tr("history.all"), "")
 
         for platform in sorted(platforms):
             self.platform_combo.addItem(platform, platform)
@@ -574,13 +582,13 @@ class PromptList(QtWidgets.QWidget):
 
             # Ajouter les métadonnées
             metadata = [
-                ("ID", prompt.get('id', '')),
-                ("Session", prompt.get('session_id', '')),
-                ("Plateforme", prompt.get('platform', '')),
-                ("Type", prompt.get('operation_type', '')),
-                ("Jetons", prompt.get('token_count', '')),
-                ("Date", prompt.get('timestamp', '')),
-                ("Statut", prompt.get('status', ''))
+                (tr("history.id"), prompt.get('id', '')),
+                (tr("history.session"), prompt.get('session_id', '')),
+                (tr("history.platform"), prompt.get('platform', '')),
+                (tr("history.type"), prompt.get('operation_type', '')),
+                (tr("history.tokens"), prompt.get('token_count', '')),
+                (tr("history.date"), prompt.get('timestamp', '')),
+                (tr("history.status"), prompt.get('status', ''))
             ]
 
             # Ajouter des métadonnées supplémentaires
@@ -632,7 +640,7 @@ class PromptList(QtWidgets.QWidget):
 
             # Créer une boîte de dialogue
             dialog = QtWidgets.QDialog(self)
-            dialog.setWindowTitle(f"Prompt #{self.current_prompt_id}")
+            dialog.setWindowTitle(tr("history.dialog_title", id=self.current_prompt_id))
             dialog.resize(900, 700)
 
             # Style pour la dialog
@@ -661,7 +669,9 @@ class PromptList(QtWidgets.QWidget):
             layout = QtWidgets.QVBoxLayout(dialog)
 
             # Titre
-            title_label = QtWidgets.QLabel(f"Prompt #{self.current_prompt_id} - {prompt.get('platform')}")
+            title_label = QtWidgets.QLabel(tr("history.dialog_header",
+                                              id=self.current_prompt_id,
+                                              platform=prompt.get('platform')))
             title_label.setStyleSheet(f"""
                 font-weight: bold;
                 font-size: 16px;
@@ -673,11 +683,11 @@ class PromptList(QtWidgets.QWidget):
             # Info
             info_layout = QtWidgets.QHBoxLayout()
 
-            info_label = QtWidgets.QLabel(
-                f"Type: {prompt.get('operation_type', '')} | "
-                f"Date: {prompt.get('timestamp', '')} | "
-                f"Jetons: {prompt.get('token_count', '')}"
-            )
+            info_label = QtWidgets.QLabel(tr("history.info_line",
+                                             type=prompt.get('operation_type', ''),
+                                             date=prompt.get('timestamp', ''),
+                                             tokens=prompt.get('token_count', '')
+                                             ))
             info_layout.addWidget(info_label)
 
             layout.addLayout(info_layout)
@@ -697,7 +707,7 @@ class PromptList(QtWidgets.QWidget):
             content_widget = QtWidgets.QWidget()
             content_layout = QtWidgets.QVBoxLayout(content_widget)
 
-            content_label = QtWidgets.QLabel("Contenu:")
+            content_label = QtWidgets.QLabel(tr("history.content_label"))
             content_label.setStyleSheet(f"font-weight: bold; color: {self.primary_color};")
             content_layout.addWidget(content_label)
 
@@ -712,7 +722,7 @@ class PromptList(QtWidgets.QWidget):
             response_widget = QtWidgets.QWidget()
             response_layout = QtWidgets.QVBoxLayout(response_widget)
 
-            response_label = QtWidgets.QLabel("Réponse:")
+            response_label = QtWidgets.QLabel(tr("history.response_label"))
             response_label.setStyleSheet(f"font-weight: bold; color: {self.primary_color};")
             response_layout.addWidget(response_label)
 
@@ -748,9 +758,8 @@ class PromptList(QtWidgets.QWidget):
         # Confirmation
         reply = QtWidgets.QMessageBox.question(
             self,
-            "Confirmer la suppression",
-            f"Êtes-vous sûr de vouloir supprimer le prompt {self.current_prompt_id} ?\n\n"
-            "Cette action est irréversible.",
+            tr("history.confirm_delete"),
+            tr("history.confirm_delete_message", id=self.current_prompt_id),
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
             QtWidgets.QMessageBox.No
         )
@@ -763,7 +772,7 @@ class PromptList(QtWidgets.QWidget):
             success = self.database.delete_prompt(self.current_prompt_id)
 
             if not success:
-                raise Exception(f"Échec de la suppression du prompt {self.current_prompt_id}")
+                raise Exception(tr("history.deletion_failed", id=self.current_prompt_id))
 
             # Émettre le signal
             prompt_id = self.current_prompt_id
@@ -773,7 +782,7 @@ class PromptList(QtWidgets.QWidget):
             self.refresh_list()
 
             # Mettre à jour le statut
-            self.update_status(f"Prompt {prompt_id} supprimé")
+            self.update_status(tr("history.prompt_deleted", id=prompt_id))
 
         except Exception as e:
             logger.error(f"Erreur lors de la suppression du prompt: {str(e)}")
@@ -781,8 +790,8 @@ class PromptList(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur de suppression",
-                f"Impossible de supprimer le prompt:\n\n{str(e)}"
+                tr("history.deletion_error"),
+                tr("history.deletion_error_message", error=str(e))
             )
 
     def _on_export(self):
@@ -796,14 +805,14 @@ class PromptList(QtWidgets.QWidget):
             prompt = self.database.get_prompt(self.current_prompt_id)
 
             if not prompt:
-                raise Exception(f"Prompt {self.current_prompt_id} introuvable")
+                raise Exception(tr("history.prompt_not_found", id=self.current_prompt_id))
 
             # Ouvrir un sélecteur de fichier
             file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
                 self,
-                "Exporter le prompt",
+                tr("history.export_prompt"),
                 os.path.expanduser(f"~/prompt_{self.current_prompt_id}.json"),
-                "Fichiers JSON (*.json);;Fichiers texte (*.txt);;Tous les fichiers (*.*)"
+                tr("history.export_file_filter")
             )
 
             if not file_path:
@@ -820,23 +829,25 @@ class PromptList(QtWidgets.QWidget):
             else:
                 # Export texte
                 with open(file_path, 'w', encoding='utf-8') as f:
-                    f.write(f"PROMPT #{prompt.get('id', '')}\n")
+                    f.write(tr("history.export_prompt_header", id=prompt.get('id', '')) + "\n")
                     f.write(f"{'=' * 80}\n")
-                    f.write(f"Plateforme: {prompt.get('platform', '')}\n")
-                    f.write(f"Type: {prompt.get('operation_type', '')}\n")
-                    f.write(f"Date: {prompt.get('timestamp', '')}\n")
+                    f.write(tr("history.export_platform", platform=prompt.get('platform', '')) + "\n")
+                    f.write(tr("history.export_type", type=prompt.get('operation_type', '')) + "\n")
+                    f.write(tr("history.export_date", date=prompt.get('timestamp', '')) + "\n")
                     f.write(f"{'=' * 80}\n\n")
 
-                    f.write("CONTENU:\n")
+                    f.write(tr("history.export_content") + "\n")
                     f.write(f"{'-' * 80}\n")
                     f.write(prompt.get('content', '') + "\n\n")
 
-                    f.write("RÉPONSE:\n")
+                    f.write(tr("history.export_response") + "\n")
                     f.write(f"{'-' * 80}\n")
                     f.write(prompt.get('response', ''))
 
             # Mettre à jour le statut
-            self.update_status(f"Prompt {self.current_prompt_id} exporté vers {os.path.basename(file_path)}")
+            self.update_status(tr("history.prompt_exported",
+                                  id=self.current_prompt_id,
+                                  file=os.path.basename(file_path)))
 
         except Exception as e:
             logger.error(f"Erreur lors de l'exportation du prompt: {str(e)}")
@@ -844,8 +855,8 @@ class PromptList(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur d'exportation",
-                f"Impossible d'exporter le prompt:\n\n{str(e)}"
+                tr("history.export_error"),
+                tr("history.export_error_message", error=str(e))
             )
 
     def export_history(self):
@@ -854,8 +865,8 @@ class PromptList(QtWidgets.QWidget):
         if not self.database:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Base de données non disponible",
-                "La base de données n'est pas disponible."
+                tr("history.database_unavailable"),
+                tr("history.database_unavailable_message")
             )
             return
 
@@ -875,17 +886,17 @@ class PromptList(QtWidgets.QWidget):
             if not prompts:
                 QtWidgets.QMessageBox.information(
                     self,
-                    "Aucun prompt",
-                    "Aucun prompt ne correspond aux filtres actuels."
+                    tr("history.no_prompt"),
+                    tr("history.no_prompt_message")
                 )
                 return
 
             # Ouvrir un sélecteur de fichier
             file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
                 self,
-                "Exporter l'historique",
+                tr("history.export_history"),
                 os.path.expanduser(f"~/historique_prompts_{datetime.now().strftime('%Y%m%d')}.json"),
-                "Fichiers JSON (*.json);;Fichiers CSV (*.csv);;Fichiers texte (*.txt);;Tous les fichiers (*.*)"
+                tr("history.export_history_filter")
             )
 
             if not file_path:
@@ -908,8 +919,15 @@ class PromptList(QtWidgets.QWidget):
 
                     # En-têtes
                     writer.writerow([
-                        "ID", "Session", "Plateforme", "Type",
-                        "Date", "Jetons", "Statut", "Contenu", "Réponse"
+                        tr("history.id"),
+                        tr("history.session"),
+                        tr("history.platform"),
+                        tr("history.type"),
+                        tr("history.date"),
+                        tr("history.tokens"),
+                        tr("history.status"),
+                        tr("history.content"),
+                        tr("history.response")
                     ])
 
                     # Données
@@ -929,45 +947,47 @@ class PromptList(QtWidgets.QWidget):
             else:
                 # Export texte
                 with open(file_path, 'w', encoding='utf-8') as f:
-                    f.write(f"HISTORIQUE DES PROMPTS\n")
-                    f.write(f"Date d'exportation: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+                    f.write(tr("history.history_header") + "\n")
+                    f.write(tr("history.export_date_line", date=datetime.now().strftime('%Y-%m-%d %H:%M:%S')) + "\n\n")
 
                     # Filtres appliqués
-                    f.write("Filtres appliqués:\n")
+                    f.write(tr("history.applied_filters") + "\n")
                     if platform:
-                        f.write(f"- Plateforme: {platform}\n")
+                        f.write(tr("history.filter_platform", platform=platform) + "\n")
                     if prompt_type:
-                        f.write(f"- Type: {prompt_type}\n")
+                        f.write(tr("history.filter_type", type=prompt_type) + "\n")
                     if search_text:
-                        f.write(f"- Recherche: {search_text}\n")
-                    f.write(f"Nombre total: {len(prompts)}\n\n")
+                        f.write(tr("history.filter_search", search=search_text) + "\n")
+                    f.write(tr("history.total_count", count=len(prompts)) + "\n\n")
 
                     # Prompts
                     for prompt in prompts:
-                        f.write(f"PROMPT #{prompt.get('id', '')}\n")
+                        f.write(tr("history.export_prompt_header", id=prompt.get('id', '')) + "\n")
                         f.write(f"{'=' * 80}\n")
-                        f.write(f"Plateforme: {prompt.get('platform', '')}\n")
-                        f.write(f"Type: {prompt.get('operation_type', '')}\n")
-                        f.write(f"Date: {prompt.get('timestamp', '')}\n")
+                        f.write(tr("history.export_platform", platform=prompt.get('platform', '')) + "\n")
+                        f.write(tr("history.export_type", type=prompt.get('operation_type', '')) + "\n")
+                        f.write(tr("history.export_date", date=prompt.get('timestamp', '')) + "\n")
                         f.write(f"{'=' * 80}\n\n")
 
-                        f.write("CONTENU:\n")
+                        f.write(tr("history.export_content") + "\n")
                         f.write(f"{'-' * 80}\n")
                         f.write(prompt.get('content', '') + "\n\n")
 
-                        f.write("RÉPONSE:\n")
+                        f.write(tr("history.export_response") + "\n")
                         f.write(f"{'-' * 80}\n")
                         f.write(prompt.get('response', '') + "\n\n")
                         f.write(f"{'=' * 80}\n\n")
 
             # Mettre à jour le statut
-            self.update_status(f"Historique exporté ({len(prompts)} prompts) vers {os.path.basename(file_path)}")
+            self.update_status(tr("history.history_exported",
+                                  count=len(prompts),
+                                  file=os.path.basename(file_path)))
 
             # Message de confirmation
             QtWidgets.QMessageBox.information(
                 self,
-                "Exportation réussie",
-                f"L'historique a été exporté avec succès vers:\n{file_path}"
+                tr("history.export_success"),
+                tr("history.export_success_message", file=file_path)
             )
 
         except Exception as e:
@@ -976,6 +996,59 @@ class PromptList(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur d'exportation",
-                f"Impossible d'exporter l'historique:\n\n{str(e)}"
+                tr("history.export_error"),
+                tr("history.export_error_message", error=str(e))
             )
+
+    def update_language(self):
+        """Met à jour tous les textes après un changement de langue"""
+        # Mettre à jour le titre
+        self.title_label.setText(tr("history.title"))
+
+        # Mettre à jour les boutons
+        self.refresh_button.setText(tr("history.refresh"))
+        self.delete_button.setText(tr("history.delete"))
+        self.export_button.setText(tr("history.export"))
+
+        # Mettre à jour les labels
+        self.platform_label.setText(tr("history.platform"))
+        self.type_label.setText(tr("history.type"))
+        self.search_label.setText(tr("history.search"))
+        self.search_edit.setPlaceholderText(tr("history.search_placeholder"))
+
+        # Mettre à jour les en-têtes du tableau
+        self.prompts_table.setHorizontalHeaderLabels([
+            tr("history.id"),
+            tr("history.date"),
+            tr("history.platform"),
+            tr("history.type"),
+            tr("history.content")
+        ])
+
+        # Mettre à jour les onglets
+        self.detail_tabs.setTabText(0, tr("history.prompt"))
+        self.detail_tabs.setTabText(1, tr("history.response"))
+        self.detail_tabs.setTabText(2, tr("history.metadata"))
+
+        # Mettre à jour les en-têtes du tableau de métadonnées
+        self.metadata_table.setHorizontalHeaderLabels([
+            tr("history.property"),
+            tr("history.value")
+        ])
+
+        # Mettre à jour le statut
+        self.status_label.setText(tr("history.status_ready"))
+        self.count_label.setText(tr("history.count", count=0))
+
+        # Mettre à jour le combo des types
+        current_type_index = self.type_combo.currentIndex()
+        self.type_combo.setItemText(0, tr("history.all"))
+        self.type_combo.setItemText(1, tr("history.standard"))
+        self.type_combo.setItemText(2, tr("history.analyze"))
+        self.type_combo.setItemText(3, tr("history.generate"))
+        self.type_combo.setItemText(4, tr("history.brainstorm"))
+
+        # Mettre à jour le combo des plateformes
+        current_platform_index = self.platform_combo.currentIndex()
+        if self.platform_combo.count() > 0:
+            self.platform_combo.setItemText(0, tr("history.all"))

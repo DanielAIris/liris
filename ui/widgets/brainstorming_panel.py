@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Liris/ui/widgets/brainstorming_panel.py
 """
@@ -9,6 +12,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 
 from utils.logger import logger
 from utils.exceptions import BrainstormingError
+from ui.localization.translator import tr
 
 
 class BrainstormingPanel(QtWidgets.QWidget):
@@ -151,13 +155,16 @@ class BrainstormingPanel(QtWidgets.QWidget):
 
         QTabBar::tab {{
             background: {self.accent_color};
-            border: 1px solid {self.accent_color};
-            padding: 12px 20px;
+            color: {self.text_color};
+            border: 1px solid #C0C0C0;
+            padding: 10px 25px;  
             margin-right: 2px;
-            border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
+            border-top-left-radius: 2px;
+            border-top-right-radius: 2px;
             font-weight: bold;
-            min-width: 80px;
+            min-width: 150px;  
+            font-size: 16px;
+            min-height: 30px;
         }}
 
         QTabBar::tab:selected {{
@@ -220,7 +227,7 @@ class BrainstormingPanel(QtWidgets.QWidget):
         header_layout = QtWidgets.QHBoxLayout()
         header_layout.setContentsMargins(0, 0, 0, 0)
 
-        title_label = QtWidgets.QLabel("Brainstorming multi-IA")
+        title_label = QtWidgets.QLabel(tr("brainstorming.title"))
         title_label.setStyleSheet(f"""
             font-size: 20px;
             font-weight: bold;
@@ -233,19 +240,19 @@ class BrainstormingPanel(QtWidgets.QWidget):
         main_layout.addLayout(header_layout)
 
         # Groupe pour les paramètres de session
-        session_group = QtWidgets.QGroupBox("Paramètres de session")
+        session_group = QtWidgets.QGroupBox(tr("brainstorming.session_params"))
         session_layout = QtWidgets.QFormLayout(session_group)
         session_layout.setSpacing(10)
         session_layout.setContentsMargins(10, 10, 10, 10)
 
         # Champ pour le nom de la session
         self.session_name_edit = QtWidgets.QLineEdit()
-        self.session_name_edit.setPlaceholderText("Nom de la session")
+        self.session_name_edit.setPlaceholderText(tr("brainstorming.session_name_placeholder"))
         self.session_name_edit.setMaximumWidth(300)
-        session_layout.addRow("Nom:", self.session_name_edit)
+        session_layout.addRow(tr("brainstorming.name"), self.session_name_edit)
 
         # Sélection des plateformes
-        platform_label = QtWidgets.QLabel("Plateformes:")
+        platform_label = QtWidgets.QLabel(tr("brainstorming.platforms"))
         session_layout.addRow(platform_label)
 
         self.platforms_list = QtWidgets.QListWidget()
@@ -254,11 +261,11 @@ class BrainstormingPanel(QtWidgets.QWidget):
         session_layout.addWidget(self.platforms_list)
 
         # Champ pour le contexte/problème
-        context_label = QtWidgets.QLabel("Contexte:")
+        context_label = QtWidgets.QLabel(tr("brainstorming.context"))
         session_layout.addRow(context_label)
 
         self.context_edit = QtWidgets.QTextEdit()
-        self.context_edit.setPlaceholderText("Décrivez le problème ou le contexte de brainstorming...")
+        self.context_edit.setPlaceholderText(tr("brainstorming.context_placeholder"))
         self.context_edit.setMinimumHeight(100)
         session_layout.addWidget(self.context_edit)
 
@@ -266,16 +273,16 @@ class BrainstormingPanel(QtWidgets.QWidget):
         buttons_layout = QtWidgets.QHBoxLayout()
         buttons_layout.setSpacing(10)
 
-        self.start_button = QtWidgets.QPushButton("Démarrer la session")
+        self.start_button = QtWidgets.QPushButton(tr("brainstorming.start_session"))
         self.start_button.clicked.connect(self._on_start_session)
         buttons_layout.addWidget(self.start_button)
 
-        self.view_results_button = QtWidgets.QPushButton("Voir les résultats")
+        self.view_results_button = QtWidgets.QPushButton(tr("brainstorming.view_results"))
         self.view_results_button.clicked.connect(self._on_view_results)
         self.view_results_button.setEnabled(False)
         buttons_layout.addWidget(self.view_results_button)
 
-        self.export_button = QtWidgets.QPushButton("Exporter")
+        self.export_button = QtWidgets.QPushButton(tr("brainstorming.export"))
         self.export_button.clicked.connect(self._on_export_results)
         self.export_button.setEnabled(False)
         buttons_layout.addWidget(self.export_button)
@@ -284,7 +291,7 @@ class BrainstormingPanel(QtWidgets.QWidget):
         main_layout.addWidget(session_group)
 
         # Zone de résultats
-        results_group = QtWidgets.QGroupBox("Résultats")
+        results_group = QtWidgets.QGroupBox(tr("brainstorming.results"))
         results_layout = QtWidgets.QVBoxLayout(results_group)
         results_layout.setSpacing(10)
         results_layout.setContentsMargins(10, 10, 10, 10)
@@ -300,7 +307,12 @@ class BrainstormingPanel(QtWidgets.QWidget):
 
         self.solutions_table = QtWidgets.QTableWidget()
         self.solutions_table.setColumnCount(4)
-        self.solutions_table.setHorizontalHeaderLabels(["Plateforme", "Score", "Évaluations", "Solution"])
+        self.solutions_table.setHorizontalHeaderLabels([
+            tr("brainstorming.platform"),
+            tr("brainstorming.score"),
+            tr("brainstorming.evaluations"),
+            tr("brainstorming.solution")
+        ])
         self.solutions_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self.solutions_table.horizontalHeader().setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
         self.solutions_table.verticalHeader().setVisible(False)
@@ -309,7 +321,7 @@ class BrainstormingPanel(QtWidgets.QWidget):
         # Connexion du double-clic
         self.solutions_table.cellDoubleClicked.connect(self._on_solution_double_clicked)
 
-        self.results_tabs.addTab(solutions_tab, "Solutions")
+        self.results_tabs.addTab(solutions_tab, tr("brainstorming.solutions"))
 
         # Onglet de comparaison
         comparison_tab = QtWidgets.QWidget()
@@ -320,14 +332,14 @@ class BrainstormingPanel(QtWidgets.QWidget):
         self.comparison_view.setReadOnly(True)
         comparison_layout.addWidget(self.comparison_view)
 
-        self.results_tabs.addTab(comparison_tab, "Comparaison")
+        self.results_tabs.addTab(comparison_tab, tr("brainstorming.comparison"))
 
         # Onglet de visualisation
         viz_tab = QtWidgets.QWidget()
         viz_layout = QtWidgets.QVBoxLayout(viz_tab)
         viz_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.viz_view = QtWidgets.QLabel("Visualisation des résultats")
+        self.viz_view = QtWidgets.QLabel(tr("brainstorming.visualization"))
         self.viz_view.setAlignment(Qt.AlignCenter)
         self.viz_view.setStyleSheet(f"""
             color: {self.primary_color};
@@ -337,13 +349,13 @@ class BrainstormingPanel(QtWidgets.QWidget):
         """)
         viz_layout.addWidget(self.viz_view)
 
-        self.results_tabs.addTab(viz_tab, "Visualisation")
+        self.results_tabs.addTab(viz_tab, tr("brainstorming.visualization"))
 
         # Statut de la session
         status_layout = QtWidgets.QHBoxLayout()
         status_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.status_label = QtWidgets.QLabel("Prêt")
+        self.status_label = QtWidgets.QLabel(tr("brainstorming.status_ready"))
         self.status_label.setStyleSheet(f"color: {self.primary_color}; font-weight: bold;")
         status_layout.addWidget(self.status_label)
 
@@ -432,7 +444,7 @@ class BrainstormingPanel(QtWidgets.QWidget):
         self.export_button.setEnabled(False)
 
         # Mettre à jour le statut
-        self.update_status("Nouvelle session créée")
+        self.update_status(tr("brainstorming.new_session_created"))
 
     def clear_results(self):
         """Efface les résultats"""
@@ -443,7 +455,7 @@ class BrainstormingPanel(QtWidgets.QWidget):
         self.comparison_view.clear()
 
         # Réinitialiser la visualisation
-        self.viz_view.setText("Visualisation des résultats")
+        self.viz_view.setText(tr("brainstorming.visualization"))
 
     def load_file(self, file_path):
         """
@@ -457,8 +469,8 @@ class BrainstormingPanel(QtWidgets.QWidget):
             if not file_path.lower().endswith(('.json', '.txt')):
                 QtWidgets.QMessageBox.warning(
                     self,
-                    "Format non pris en charge",
-                    "Seuls les fichiers JSON et TXT sont pris en charge."
+                    tr("brainstorming.unsupported_format"),
+                    tr("brainstorming.file_format_error")
                 )
                 return
 
@@ -472,10 +484,10 @@ class BrainstormingPanel(QtWidgets.QWidget):
             # Mettre à jour le nom de session
             file_name = os.path.basename(file_path)
             file_name_without_ext = os.path.splitext(file_name)[0]
-            self.session_name_edit.setText(f"Session basée sur {file_name_without_ext}")
+            self.session_name_edit.setText(tr("brainstorming.session_from_file", file=file_name_without_ext))
 
             # Mettre à jour le statut
-            self.update_status(f"Fichier chargé: {file_name}")
+            self.update_status(tr("brainstorming.file_loaded", file=file_name))
 
         except Exception as e:
             logger.error(f"Erreur lors du chargement du fichier: {str(e)}")
@@ -483,8 +495,8 @@ class BrainstormingPanel(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur de chargement",
-                f"Impossible de charger le fichier:\n\n{str(e)}"
+                tr("brainstorming.load_error"),
+                tr("brainstorming.load_error_message", error=str(e))
             )
 
     def save_session(self):
@@ -493,17 +505,17 @@ class BrainstormingPanel(QtWidgets.QWidget):
         if not self.current_session_id:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Aucune session",
-                "Aucune session n'est actuellement active."
+                tr("brainstorming.no_session"),
+                tr("brainstorming.no_session_active")
             )
             return
 
         # Ouvrir un sélecteur de fichier
         file_path, file_filter = QtWidgets.QFileDialog.getSaveFileName(
             self,
-            "Enregistrer la session",
+            tr("brainstorming.save_session"),
             os.path.expanduser(f"~/session_{self.current_session_id}.json"),
-            "Fichiers JSON (*.json);;Fichiers texte (*.txt);;Tous les fichiers (*.*)"
+            tr("brainstorming.save_dialog_filter")
         )
 
         if not file_path:
@@ -524,8 +536,8 @@ class BrainstormingPanel(QtWidgets.QWidget):
                 # Message de confirmation
                 QtWidgets.QMessageBox.information(
                     self,
-                    "Sauvegarde réussie",
-                    f"La session a été enregistrée dans le fichier:\n{file_path}"
+                    tr("brainstorming.save_success"),
+                    tr("brainstorming.save_success_message", file=file_path)
                 )
             else:
                 # Sauvegarde basique
@@ -535,8 +547,8 @@ class BrainstormingPanel(QtWidgets.QWidget):
                 # Message de confirmation
                 QtWidgets.QMessageBox.information(
                     self,
-                    "Sauvegarde réussie",
-                    f"Le contexte de la session a été enregistré dans le fichier:\n{file_path}"
+                    tr("brainstorming.save_success"),
+                    tr("brainstorming.save_success_message", file=file_path)
                 )
 
         except Exception as e:
@@ -545,8 +557,8 @@ class BrainstormingPanel(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur d'enregistrement",
-                f"Impossible d'enregistrer la session:\n\n{str(e)}"
+                tr("brainstorming.save_error"),
+                tr("brainstorming.save_error_message", error=str(e))
             )
 
     def _on_start_session(self):
@@ -555,22 +567,22 @@ class BrainstormingPanel(QtWidgets.QWidget):
         if not self.conductor or not self.orchestrator:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Système non disponible",
-                "Le système d'IA n'est pas initialisé correctement."
+                tr("brainstorming.system_unavailable"),
+                tr("brainstorming.system_init_error")
             )
             return
 
         # Récupérer les paramètres
         session_name = self.session_name_edit.text().strip()
         if not session_name:
-            session_name = f"Session de brainstorming {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+            session_name = tr("brainstorming.default_session_name", date=datetime.now().strftime('%Y-%m-%d %H:%M'))
 
         context = self.context_edit.toPlainText().strip()
         if not context:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Contexte manquant",
-                "Veuillez décrire le problème ou le contexte du brainstorming."
+                tr("brainstorming.missing_context"),
+                tr("brainstorming.context_required")
             )
             return
 
@@ -584,17 +596,16 @@ class BrainstormingPanel(QtWidgets.QWidget):
         if not selected_platforms:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Plateformes manquantes",
-                "Veuillez sélectionner au moins une plateforme d'IA."
+                tr("brainstorming.missing_platforms"),
+                tr("brainstorming.platforms_required")
             )
             return
 
         # Confirmation
         reply = QtWidgets.QMessageBox.question(
             self,
-            "Démarrer la session",
-            f"Voulez-vous démarrer une session de brainstorming avec {len(selected_platforms)} plateforme(s) ?\n\n"
-            "Cette opération peut prendre plusieurs minutes.",
+            tr("brainstorming.start_session"),
+            tr("brainstorming.start_confirmation", count=len(selected_platforms)),
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
             QtWidgets.QMessageBox.Yes
         )
@@ -609,7 +620,7 @@ class BrainstormingPanel(QtWidgets.QWidget):
             )
 
             # Mettre à jour l'interface
-            self.update_status(f"Session {session_id} créée, démarrage...", 10)
+            self.update_status(tr("brainstorming.session_created", id=session_id), 10)
             self.current_session_id = session_id
 
             # Désactiver les contrôles
@@ -630,8 +641,8 @@ class BrainstormingPanel(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur de démarrage",
-                f"Impossible de démarrer la session:\n\n{str(e)}"
+                tr("brainstorming.start_error"),
+                tr("brainstorming.start_error_message", error=str(e))
             )
 
     def _execute_session(self, session_id):
@@ -643,7 +654,7 @@ class BrainstormingPanel(QtWidgets.QWidget):
         """
         try:
             # Mettre à jour le statut
-            self.update_status(f"Session {session_id} en cours...", 20)
+            self.update_status(tr("brainstorming.session_running", id=session_id), 20)
 
             # Démarrer la session
             self.orchestrator.start_session(session_id, sync=True, timeout=300)
@@ -652,7 +663,7 @@ class BrainstormingPanel(QtWidgets.QWidget):
             results = self.orchestrator.get_session_results(session_id)
 
             # Mettre à jour l'interface
-            self.update_status(f"Session {session_id} terminée", 100)
+            self.update_status(tr("brainstorming.session_completed", id=session_id), 100)
 
             # Réactiver les contrôles
             self.session_name_edit.setEnabled(True)
@@ -674,7 +685,7 @@ class BrainstormingPanel(QtWidgets.QWidget):
             logger.error(f"Erreur lors de l'exécution de la session: {str(e)}")
 
             # Mettre à jour le statut
-            self.update_status(f"Erreur: {str(e)}")
+            self.update_status(tr("brainstorming.error", error=str(e)))
 
             # Réactiver les contrôles
             self.session_name_edit.setEnabled(True)
@@ -694,7 +705,7 @@ class BrainstormingPanel(QtWidgets.QWidget):
         """
         # Vérifier les résultats
         if not results or 'solutions' not in results:
-            self.update_status("Aucun résultat disponible")
+            self.update_status(tr("brainstorming.no_results"))
             return
 
         # Initialisation du modèle
@@ -814,7 +825,7 @@ class BrainstormingPanel(QtWidgets.QWidget):
         # Contexte
         context = results.get('context', '')
         if context:
-            html += "<h3>Contexte du problème</h3>"
+            html += f"<h3>{tr('brainstorming.problem_context')}</h3>"
             html += f"<p>{context}</p>"
 
         # Tableau des scores
@@ -822,9 +833,9 @@ class BrainstormingPanel(QtWidgets.QWidget):
         scores = results.get('final_scores', {})
 
         if solutions:
-            html += "<h3>Résultats</h3>"
+            html += f"<h3>{tr('brainstorming.results')}</h3>"
             html += "<table>"
-            html += "<tr><th>Plateforme</th><th>Score</th><th>Date de soumission</th></tr>"
+            html += f"<tr><th>{tr('brainstorming.platform')}</th><th>{tr('brainstorming.score')}</th><th>{tr('brainstorming.submission_date')}</th></tr>"
 
             # Trier par score
             sorted_platforms = sorted(
@@ -873,11 +884,11 @@ class BrainstormingPanel(QtWidgets.QWidget):
         evaluations = results.get('evaluations', {})
 
         if evaluations:
-            html += "<h3>Matrice d'évaluation</h3>"
+            html += f"<h3>{tr('brainstorming.evaluation_matrix')}</h3>"
             html += "<table>"
 
             # En-tête du tableau
-            html += "<tr><th>Évaluateur \\ Solution</th>"
+            html += f"<tr><th>{tr('brainstorming.evaluator')} \\ {tr('brainstorming.solution')}</th>"
             for platform in sorted_platforms:
                 html += f"<th>{platform}</th>"
             html += "</tr>"
@@ -902,9 +913,9 @@ class BrainstormingPanel(QtWidgets.QWidget):
                                 eval_score = captured_text[1]
                                 html += f"<td>{eval_score}/100</td>"
                             else:
-                                html += "<td>Score non trouvé</td>"
+                                html += f"<td>{tr('brainstorming.score_not_found')}</td>"
                         else:
-                            html += f"<td>Évaluation présente</td>"
+                            html += f"<td>{tr('brainstorming.evaluation_present')}</td>"
                     else:
                         html += "<td>-</td>"
 
@@ -926,7 +937,7 @@ class BrainstormingPanel(QtWidgets.QWidget):
         """
         # À implémenter : graphiques de visualisation des résultats
         # Pour l'instant, afficher un message
-        self.viz_view.setText("Visualisation à implémenter\n\nGraphiques interactifs bientôt disponibles")
+        self.viz_view.setText(tr("brainstorming.visualization_coming_soon"))
 
     def _on_view_results(self):
         """Affiche les résultats détaillés"""
@@ -934,8 +945,8 @@ class BrainstormingPanel(QtWidgets.QWidget):
         if not self.current_session_id:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Aucune session",
-                "Aucune session n'est actuellement active."
+                tr("brainstorming.no_session"),
+                tr("brainstorming.no_session_active")
             )
             return
 
@@ -948,8 +959,8 @@ class BrainstormingPanel(QtWidgets.QWidget):
         if not self.current_session_id:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Aucune session",
-                "Aucune session n'est actuellement active."
+                tr("brainstorming.no_session"),
+                tr("brainstorming.no_session_active")
             )
             return
 
@@ -965,17 +976,17 @@ class BrainstormingPanel(QtWidgets.QWidget):
         if not self.current_session_id:
             QtWidgets.QMessageBox.warning(
                 self,
-                "Aucune session",
-                "Aucune session n'est actuellement active."
+                tr("brainstorming.no_session"),
+                tr("brainstorming.no_session_active")
             )
             return
 
         # Ouvrir un sélecteur de fichier
         file_path, file_filter = QtWidgets.QFileDialog.getSaveFileName(
             self,
-            "Exporter les résultats",
+            tr("brainstorming.export_results"),
             os.path.expanduser(f"~/brainstorming_{self.current_session_id}.json"),
-            "Fichiers JSON (*.json);;Fichiers texte (*.txt);;Fichiers HTML (*.html);;Tous les fichiers (*.*)"
+            tr("brainstorming.export_dialog_filter")
         )
 
         if not file_path:
@@ -1011,8 +1022,8 @@ class BrainstormingPanel(QtWidgets.QWidget):
                 # Message de confirmation
                 QtWidgets.QMessageBox.information(
                     self,
-                    "Exportation réussie",
-                    f"Les résultats ont été exportés dans le fichier:\n{file_path}"
+                    tr("brainstorming.export_success"),
+                    tr("brainstorming.export_success_message", file=file_path)
                 )
             else:
                 # Exportation basique
@@ -1046,7 +1057,7 @@ class BrainstormingPanel(QtWidgets.QWidget):
                     html_content = f"""
                     <html>
                     <head>
-                        <title>Résultats de brainstorming</title>
+                        <title>{tr('brainstorming.export_title')}</title>
                         <style>
                             body {{ font-family: 'Segoe UI', Arial, sans-serif; margin: 20px; background-color: {self.background_color}; }}
                             .container {{ max-width: 1000px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
@@ -1057,9 +1068,9 @@ class BrainstormingPanel(QtWidgets.QWidget):
                     </head>
                     <body>
                         <div class="container">
-                            <h1>Session de brainstorming #{self.current_session_id}</h1>
+                            <h1>{tr('brainstorming.session_title', id=self.current_session_id)}</h1>
                             <h2>{self.session_name_edit.text()}</h2>
-                            <h3>Contexte:</h3>
+                            <h3>{tr('brainstorming.context')}</h3>
                             <pre>{self.context_edit.toPlainText()}</pre>
                         </div>
                     </body>
@@ -1070,10 +1081,10 @@ class BrainstormingPanel(QtWidgets.QWidget):
                 else:
                     # Format texte par défaut
                     with open(file_path, 'w', encoding='utf-8') as f:
-                        f.write(f"Session de brainstorming #{self.current_session_id}\n")
-                        f.write(f"Nom: {self.session_name_edit.text()}\n")
-                        f.write(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-                        f.write(f"Contexte:\n")
+                        f.write(tr('brainstorming.session_title', id=self.current_session_id) + "\n")
+                        f.write(tr('brainstorming.name') + ": " + self.session_name_edit.text() + "\n")
+                        f.write(tr('brainstorming.date') + ": " + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "\n\n")
+                        f.write(tr('brainstorming.context') + ":\n")
                         f.write(f"{'=' * 80}\n")
                         f.write(self.context_edit.toPlainText())
                         f.write(f"\n{'=' * 80}\n")
@@ -1081,8 +1092,8 @@ class BrainstormingPanel(QtWidgets.QWidget):
                 # Message de confirmation
                 QtWidgets.QMessageBox.information(
                     self,
-                    "Exportation réussie",
-                    f"Les informations de session ont été exportées dans le fichier:\n{file_path}"
+                    tr("brainstorming.export_success"),
+                    tr("brainstorming.export_info_message", file=file_path)
                 )
 
         except Exception as e:
@@ -1091,8 +1102,8 @@ class BrainstormingPanel(QtWidgets.QWidget):
             # Message d'erreur
             QtWidgets.QMessageBox.critical(
                 self,
-                "Erreur d'exportation",
-                f"Impossible d'exporter les résultats:\n\n{str(e)}"
+                tr("brainstorming.export_error"),
+                tr("brainstorming.export_error_message", error=str(e))
             )
 
     def _on_solution_double_clicked(self, row, column):
@@ -1150,39 +1161,39 @@ class BrainstormingPanel(QtWidgets.QWidget):
             html += "</style></head><body><div class='container'>"
 
             # Titre
-            html += f"<h1>Solution de {platform}</h1>"
+            html += f"<h1>{tr('brainstorming.solution_from', platform=platform)}</h1>"
 
             # Score
             scores = results.get('final_scores', {})
             score = scores.get(platform, None)
 
             if score is not None:
-                html += f"<div class='score-box'>Score final: {score}/100</div>"
+                html += f"<div class='score-box'>{tr('brainstorming.final_score', score=score)}</div>"
                 html += "<br><br>"
 
             # Solution
-            html += "<h2>Solution proposée</h2>"
+            html += f"<h2>{tr('brainstorming.proposed_solution')}</h2>"
             html += f"<pre>{content}</pre>"
 
             # Évaluations
-            html += "<h2>Évaluations reçues</h2>"
+            html += f"<h2>{tr('brainstorming.received_evaluations')}</h2>"
 
             eval_count = 0
             for evaluator, evals in evaluations.items():
                 if platform in evals:
                     eval_text = evals[platform]
-                    html += f"<h3>Évaluation par {evaluator}</h3>"
+                    html += f"<h3>{tr('brainstorming.evaluation_by', evaluator=evaluator)}</h3>"
                     html += f"<blockquote>{eval_text}</blockquote>"
                     eval_count += 1
 
             if eval_count == 0:
-                html += "<p>Aucune évaluation disponible pour cette solution.</p>"
+                html += f"<p>{tr('brainstorming.no_evaluation')}</p>"
 
             html += "</div></body></html>"
 
             # Afficher la boîte de dialogue
             dialog = QtWidgets.QDialog(self)
-            dialog.setWindowTitle(f"Solution de {platform}")
+            dialog.setWindowTitle(tr('brainstorming.solution_from', platform=platform))
             dialog.setMinimumSize(600, 400)
 
             # Disposition
@@ -1205,3 +1216,45 @@ class BrainstormingPanel(QtWidgets.QWidget):
 
         except Exception as e:
             logger.error(f"Erreur lors de l'affichage de la solution: {str(e)}")
+
+    def update_language(self):
+        """Met à jour tous les textes après un changement de langue"""
+        # Mettre à jour le titre
+        title_label = self.findChild(QtWidgets.QLabel)
+        if title_label:
+            title_label.setText(tr("brainstorming.title"))
+
+        # Mettre à jour les GroupBox
+        for group_box in self.findChildren(QtWidgets.QGroupBox):
+            if "session_params" in group_box.objectName():
+                group_box.setTitle(tr("brainstorming.session_params"))
+            elif "results" in group_box.objectName():
+                group_box.setTitle(tr("brainstorming.results"))
+
+        # Mettre à jour les boutons
+        self.start_button.setText(tr("brainstorming.start_session"))
+        self.view_results_button.setText(tr("brainstorming.view_results"))
+        self.export_button.setText(tr("brainstorming.export"))
+
+        # Mettre à jour les onglets
+        self.results_tabs.setTabText(0, tr("brainstorming.solutions"))
+        self.results_tabs.setTabText(1, tr("brainstorming.comparison"))
+        self.results_tabs.setTabText(2, tr("brainstorming.visualization"))
+
+        # Mettre à jour les placeholders
+        self.session_name_edit.setPlaceholderText(tr("brainstorming.session_name_placeholder"))
+        self.context_edit.setPlaceholderText(tr("brainstorming.context_placeholder"))
+
+        # Mettre à jour le statut
+        self.status_label.setText(tr("brainstorming.status_ready"))
+
+        # Mettre à jour la visualisation
+        self.viz_view.setText(tr("brainstorming.visualization"))
+
+        # Mettre à jour les headers du tableau
+        self.solutions_table.setHorizontalHeaderLabels([
+            tr("brainstorming.platform"),
+            tr("brainstorming.score"),
+            tr("brainstorming.evaluations"),
+            tr("brainstorming.solution")
+        ])

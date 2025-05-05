@@ -18,6 +18,9 @@ from ui.widgets.brainstorming_panel import BrainstormingPanel
 from ui.widgets.annotation_form import AnnotationForm
 from ui.widgets.dataset_table import DatasetTable
 from ui.widgets.prompt_list import PromptList
+from ui.widgets.language_selector import LanguageSelector
+from ui.styles.theme import Theme
+from ui.localization.translator import translator, tr
 
 from core.orchestration.conductor import AIConductor
 from core.data.database import Database
@@ -37,24 +40,18 @@ class MainWindow(QMainWindow):
         print("=== DÉBUT - Initialisation de MainWindow ===")
         super().__init__()
 
-        self.setWindowTitle("Liris - Plateforme d'IA Collaborative")
+        self.setWindowTitle(tr("app_title"))
         self.setMinimumSize(1024, 768)
 
-        # Définir le favicon (logo)
-        logo_path = os.path.join("ui", "resources", "icons", "logo.png")
+        # Définir l'icône avec le fichier .ico
+        logo_path = os.path.join("ui", "resources", "icons", "logo.ico")
         if os.path.exists(logo_path):
             self.setWindowIcon(QtGui.QIcon(logo_path))
-
-        # Couleurs du thème
-        self.primary_color = "#A23B2D"  # Rouge brique
-        self.secondary_color = "#D35A4A"  # Rouge brique clair
-        self.background_color = "#F9F6F6"  # Beige très clair
-        self.light_background = "#FFFFFF"  # Blanc pour la fenêtre principale
-        self.text_color = "#333333"  # Gris foncé
-        self.accent_color = "#E8E0DF"  # Gris clair pour les accents
+        else:
+            logger.warning("Icône non trouvée à l'emplacement: %s", logo_path)
 
         # Appliquer le style global
-        self._init_style()
+        self.setStyleSheet(Theme.get_global_stylesheet())
 
         # Initialiser les composants
         self._init_components()
@@ -79,166 +76,6 @@ class MainWindow(QMainWindow):
         logger.info("Application démarrée")
         print("=== FIN - Initialisation de MainWindow ===")
 
-    def _init_style(self):
-        """Configure le style global de l'application"""
-        stylesheet = f"""
-        QMainWindow {{
-            background-color: {self.light_background};
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }}
-
-        QMenuBar {{
-            background-color: {self.primary_color};
-            color: white;
-            padding: 5px;
-            border: none;
-        }}
-
-        QMenuBar::item {{
-            background-color: transparent;
-            padding: 5px 15px;
-            color: white;
-        }}
-
-        QMenuBar::item:selected {{
-            background-color: {self.secondary_color};
-        }}
-
-        QMenu {{
-            background-color: white;
-            border: 1px solid {self.accent_color};
-            border-radius: 4px;
-            color: {self.text_color};
-        }}
-
-        QMenu::item {{
-            padding: 8px 30px;
-        }}
-
-        QMenu::item:selected {{
-            background-color: {self.accent_color};
-            color: {self.text_color};
-        }}
-
-        QMenu::separator {{
-            height: 1px;
-            background: {self.accent_color};
-            margin: 5px 0;
-        }}
-
-        QTabWidget::pane {{
-            border: 1px solid {self.accent_color};
-            top: -2px;
-            border-radius: 4px;
-            background-color: white;
-        }}
-
-        QTabBar::tab {{
-            background: {self.accent_color};
-            color: {self.text_color};
-            border: 1px solid #C0C0C0;
-            padding: 12px 20px;
-            margin-right: 2px;
-            border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
-            font-weight: bold;
-            min-width: 80px;
-        }}
-
-        QTabBar::tab:selected {{
-            background: {self.primary_color};
-            color: white;
-            border-bottom: 1px solid white;
-        }}
-
-        QTabBar::tab:hover {{
-            background: {self.secondary_color};
-            color: white;
-        }}
-
-        QFrame {{
-            border: 1px solid {self.accent_color};
-            border-radius: 4px;
-            padding: 10px;
-            background-color: white;
-        }}
-
-        QGroupBox {{
-            border: 1px solid {self.accent_color};
-            border-radius: 4px;
-            margin-top: 1em;
-            padding-top: 10px;
-            font-weight: bold;
-        }}
-
-        QGroupBox::title {{
-            subcontrol-origin: margin;
-            left: 10px;
-            padding: 0 5px 0 5px;
-        }}
-
-        QPushButton {{
-            background-color: {self.primary_color};
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 4px;
-            font-weight: bold;
-            min-width: 120px;
-        }}
-
-        QPushButton:hover {{
-            background-color: {self.secondary_color};
-        }}
-
-        QPushButton:pressed {{
-            background-color: #922E23;
-        }}
-
-        QLineEdit, QTextEdit, QComboBox {{
-            border: 1px solid {self.accent_color};
-            border-radius: 4px;
-            padding: 8px;
-            background-color: white;
-            selection-background-color: {self.primary_color};
-            selection-color: white;
-        }}
-
-        QLineEdit:focus, QTextEdit:focus, QComboBox:focus {{
-            border: 2px solid {self.primary_color};
-        }}
-
-        QLabel {{
-            color: {self.text_color};
-        }}
-
-        QStatusBar {{
-            background-color: {self.background_color};
-            border-top: 1px solid {self.accent_color};
-            color: {self.text_color};
-        }}
-
-        QStatusBar QLabel {{
-            color: {self.text_color};
-            font-weight: bold;
-            padding: 0 10px;
-        }}
-
-        QProgressBar {{
-            border: 1px solid {self.accent_color};
-            border-radius: 4px;
-            text-align: center;
-            background-color: #F0F0F0;
-            font-weight: bold;
-        }}
-
-        QProgressBar::chunk {{
-            background-color: {self.primary_color};
-            border-radius: 4px;
-        }}
-        """
-        self.setStyleSheet(stylesheet)
-
     def _init_components(self):
         """Initialise les composants principaux"""
         print("   - Création des widgets principaux...")
@@ -256,11 +93,11 @@ class MainWindow(QMainWindow):
         self.progress_bar.setVisible(False)
 
         # Widgets d'état
-        self.status_label = QtWidgets.QLabel("Prêt")
-        self.status_label.setStyleSheet(f"color: {self.primary_color}; font-weight: bold;")
+        self.status_label = QtWidgets.QLabel(tr("status.ready"))
+        self.status_label.setStyleSheet(f"color: {Theme.PRIMARY_COLOR}; font-weight: bold;")
 
-        self.platform_label = QtWidgets.QLabel("Aucune plateforme")
-        self.platform_label.setStyleSheet(f"color: {self.primary_color}; font-weight: bold;")
+        self.platform_label = QtWidgets.QLabel(tr("messages.no_platforms"))
+        self.platform_label.setStyleSheet(f"color: {Theme.PRIMARY_COLOR}; font-weight: bold;")
 
     def _init_ui(self):
         """Configure l'interface utilisateur"""
@@ -277,34 +114,48 @@ class MainWindow(QMainWindow):
         header_widget = QtWidgets.QWidget()
         header_widget.setStyleSheet(f"""
             background-color: white;
-            border-bottom: 2px solid {self.primary_color};
+            border-bottom: 2px solid {Theme.PRIMARY_COLOR};
         """)
         header_layout = QtWidgets.QHBoxLayout(header_widget)
         header_layout.setContentsMargins(30, 20, 30, 20)
 
-        # Titre et sous-titre seulement (pas de logo dans l'interface)
+        # Logo et titre
+        logo_layout = QtWidgets.QHBoxLayout()
+        logo_layout.setSpacing(15)
+
+        # Logo (si disponible)
+        logo_path = os.path.join("ui", "resources", "icons", "logo.png")
+        if os.path.exists(logo_path):
+            logo_label = QtWidgets.QLabel()
+            pixmap = QtGui.QPixmap(logo_path)
+            scaled_pixmap = pixmap.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            logo_label.setPixmap(scaled_pixmap)
+            logo_layout.addWidget(logo_label)
+
+        # Titre et sous-titre
         title_layout = QtWidgets.QVBoxLayout()
 
         title_label = QtWidgets.QLabel("Liris")
         title_label.setStyleSheet(f"""
-            font-size: 28px;
+            font-size: {Theme.FONT_SIZE_TITLE}px;
             font-weight: bold;
-            color: {self.primary_color};
+            color: {Theme.PRIMARY_COLOR};
             margin: 0;
             padding: 0;
         """)
         title_layout.addWidget(title_label)
 
-        subtitle_label = QtWidgets.QLabel("Plateforme d'IA Collaborative")
+        subtitle_label = QtWidgets.QLabel(tr("app_title"))
         subtitle_label.setStyleSheet(f"""
-            font-size: 16px;
-            color: {self.secondary_color};
+            font-size: {Theme.FONT_SIZE_HEADER}px;
+            color: {Theme.SECONDARY_COLOR};
             margin: 0;
             padding: 0;
         """)
         title_layout.addWidget(subtitle_label)
 
-        header_layout.addLayout(title_layout)
+        logo_layout.addLayout(title_layout)
+        header_layout.addLayout(logo_layout)
         header_layout.addStretch()
 
         # Indicateur de statut système dans l'en-tête
@@ -321,7 +172,7 @@ class MainWindow(QMainWindow):
         system_status_layout.addWidget(self.connection_indicator)
 
         self.connection_label = QtWidgets.QLabel("Système en attente")
-        self.connection_label.setStyleSheet(f"color: {self.text_color}; margin-left: 5px;")
+        self.connection_label.setStyleSheet(f"color: {Theme.TEXT_COLOR}; margin-left: 5px;")
         system_status_layout.addWidget(self.connection_label)
 
         header_layout.addWidget(system_status_widget)
@@ -332,11 +183,40 @@ class MainWindow(QMainWindow):
         self.tab_widget = QtWidgets.QTabWidget()
         self.tab_widget.setTabsClosable(False)
 
+        # Style personnalisé pour les onglets plus grands
+        tab_stylesheet = f"""
+        QTabBar::tab {{
+            background: {Theme.ACCENT_COLOR};
+            color: {Theme.TEXT_COLOR};
+            border: 1px solid #C0C0C0;
+            padding: 10px 25px;  
+            margin-right: 2px;
+            border-top-left-radius: 2px;
+            border-top-right-radius: 2px;
+            font-weight: bold;
+            min-width: 150px;  
+            font-size: {Theme.FONT_SIZE_HEADER}px;
+            min-height: 30px;
+        }}
+
+        QTabBar::tab:selected {{
+            background: {Theme.PRIMARY_COLOR};
+            color: white;
+            border-bottom: 1px solid white;
+        }}
+
+        QTabBar::tab:hover {{
+            background: {Theme.SECONDARY_COLOR};
+            color: white;
+        }}
+        """
+        self.tab_widget.setStyleSheet(tab_stylesheet)
+
         # Créer les onglets principaux
-        self.tab_widget.addTab(self.brainstorming_panel, "Brainstorming")
-        self.tab_widget.addTab(self.annotation_form, "Annotation")
-        self.tab_widget.addTab(self.dataset_table, "Datasets")
-        self.tab_widget.addTab(self.prompt_list, "Historique")
+        self.tab_widget.addTab(self.brainstorming_panel, tr("brainstorming_tab"))
+        self.tab_widget.addTab(self.annotation_form, tr("annotation_tab"))
+        self.tab_widget.addTab(self.dataset_table, tr("datasets_tab"))
+        self.tab_widget.addTab(self.prompt_list, tr("history_tab"))
 
         # Configuration des onglets
         self.tab_widget.setTabPosition(QtWidgets.QTabWidget.North)
@@ -354,88 +234,154 @@ class MainWindow(QMainWindow):
         menubar = self.menuBar()
 
         # Menu Fichier
-        file_menu = menubar.addMenu("&Fichier")
+        file_menu = menubar.addMenu(tr("file"))
 
         # Actions du menu Fichier
-        new_action = QtWidgets.QAction("&Nouveau", self)
+        new_action = QtWidgets.QAction(tr("new"), self)
         new_action.setShortcut("Ctrl+N")
         new_action.triggered.connect(self._on_new_file)
         file_menu.addAction(new_action)
 
-        open_action = QtWidgets.QAction("&Ouvrir", self)
+        open_action = QtWidgets.QAction(tr("open"), self)
         open_action.setShortcut("Ctrl+O")
         open_action.triggered.connect(self._on_open_file)
         file_menu.addAction(open_action)
 
-        save_action = QtWidgets.QAction("&Enregistrer", self)
+        save_action = QtWidgets.QAction(tr("save"), self)
         save_action.setShortcut("Ctrl+S")
         save_action.triggered.connect(self._on_save_file)
         file_menu.addAction(save_action)
 
-        export_action = QtWidgets.QAction("E&xporter", self)
+        export_action = QtWidgets.QAction(tr("export"), self)
         export_action.setShortcut("Ctrl+E")
         export_action.triggered.connect(self._on_export_data)
         file_menu.addAction(export_action)
 
         file_menu.addSeparator()
 
-        exit_action = QtWidgets.QAction("&Quitter", self)
+        exit_action = QtWidgets.QAction(tr("quit"), self)
         exit_action.setShortcut("Ctrl+Q")
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
 
         # Menu Édition
-        edit_menu = menubar.addMenu("&Édition")
+        edit_menu = menubar.addMenu(tr("edit"))
 
         # Actions du menu Édition
-        settings_action = QtWidgets.QAction("&Préférences", self)
+        settings_action = QtWidgets.QAction(tr("preferences"), self)
         settings_action.triggered.connect(self._on_settings)
         edit_menu.addAction(settings_action)
 
-        refresh_action = QtWidgets.QAction("&Actualiser", self)
+        language_action = QtWidgets.QAction(tr("select_language"), self)
+        language_action.triggered.connect(self._on_change_language)
+        edit_menu.addAction(language_action)
+
+        refresh_action = QtWidgets.QAction(tr("refresh"), self)
         refresh_action.setShortcut("F5")
         refresh_action.triggered.connect(self._on_refresh)
         edit_menu.addAction(refresh_action)
 
         # Menu IA
-        ai_menu = menubar.addMenu("&IA")
+        ai_menu = menubar.addMenu(tr("ai"))
 
         # Actions du menu IA
-        platforms_action = QtWidgets.QAction("&Plateformes", self)
+        platforms_action = QtWidgets.QAction(tr("platforms"), self)
         platforms_action.triggered.connect(self._on_show_platforms)
         ai_menu.addAction(platforms_action)
 
-        test_action = QtWidgets.QAction("&Tester la connexion", self)
+        test_action = QtWidgets.QAction(tr("test_connection"), self)
         test_action.triggered.connect(self._on_test_ai)
         ai_menu.addAction(test_action)
 
         ai_menu.addSeparator()
 
-        compare_action = QtWidgets.QAction("&Comparer les résultats", self)
+        compare_action = QtWidgets.QAction(tr("compare_results"), self)
         compare_action.triggered.connect(self._on_compare_ai)
         ai_menu.addAction(compare_action)
 
         # Menu Aide
-        help_menu = menubar.addMenu("&Aide")
+        help_menu = menubar.addMenu(tr("help"))
 
         # Actions du menu Aide
-        about_action = QtWidgets.QAction("&À propos", self)
+        about_action = QtWidgets.QAction(tr("about"), self)
         about_action.triggered.connect(self._on_about)
         help_menu.addAction(about_action)
 
-        docs_action = QtWidgets.QAction("&Documentation", self)
+        docs_action = QtWidgets.QAction(tr("documentation"), self)
         docs_action.triggered.connect(self._on_documentation)
         help_menu.addAction(docs_action)
+
+    def _update_menus(self):
+        """Met à jour les textes des menus"""
+        menubar = self.menuBar()
+
+        # Récupérer les menus
+        menus = {
+            tr("file"): 0,
+            tr("edit"): 1,
+            tr("ai"): 2,
+            tr("help"): 3
+        }
+
+        # Mettre à jour les titres des menus
+        for i, action in enumerate(menubar.actions()):
+            for title, index in menus.items():
+                if i == index:
+                    action.setText(title)
+                    break
+
+        # Mettre à jour les actions
+        self._update_menu_actions()
+
+    def _update_menu_actions(self):
+        """Met à jour les textes des actions des menus"""
+        menubar = self.menuBar()
+
+        # Textes des actions par menu
+        menu_actions = {
+            0: [  # File
+                tr("new"),
+                tr("open"),
+                tr("save"),
+                tr("export"),
+                None,  # Séparateur
+                tr("quit")
+            ],
+            1: [  # Edit
+                tr("preferences"),
+                tr("select_language"),
+                tr("refresh")
+            ],
+            2: [  # AI
+                tr("platforms"),
+                tr("test_connection"),
+                None,  # Séparateur
+                tr("compare_results")
+            ],
+            3: [  # Help
+                tr("about"),
+                tr("documentation")
+            ]
+        }
+
+        # Mettre à jour chaque menu
+        for menu_index, actions_texts in menu_actions.items():
+            if menu_index < len(menubar.actions()):
+                menu = menubar.actions()[menu_index].menu()
+                if menu:
+                    actions = menu.actions()
+                    action_index = 0
+                    for i, text in enumerate(actions_texts):
+                        if text is None:  # Séparateur
+                            action_index += 1
+                            continue
+                        if action_index < len(actions) and not actions[action_index].isSeparator():
+                            actions[action_index].setText(text)
+                        action_index += 1
 
     def _init_statusbar(self):
         """Configure la barre d'état"""
         statusbar = self.statusBar()
-        statusbar.setStyleSheet(f"""
-            QStatusBar {{
-                border-top: 1px solid {self.accent_color};
-                padding: 5px;
-            }}
-        """)
 
         # Ajouter les widgets à la barre d'état
         statusbar.addPermanentWidget(self.progress_bar, 1)
@@ -443,7 +389,7 @@ class MainWindow(QMainWindow):
         statusbar.addPermanentWidget(self.platform_label, 1)
 
         # Barre d'état initiale
-        self.update_status("Application prête")
+        self.update_status(tr("status.ready"))
 
     def _init_connections(self):
         """Configure les connexions signal-slot entre widgets"""
@@ -466,6 +412,63 @@ class MainWindow(QMainWindow):
         # Connexions de la liste de prompts
         self.prompt_list.prompt_selected.connect(self._on_prompt_selected)
         self.prompt_list.prompt_deleted.connect(self._on_prompt_deleted)
+
+    def change_language(self, language_code):
+        """Change la langue de l'application"""
+        if translator.set_language(language_code):
+            # Mettre à jour le titre de la fenêtre
+            self.setWindowTitle(tr("app_title"))
+
+            # Mettre à jour les onglets
+            self.tab_widget.setTabText(0, tr("brainstorming_tab"))
+            self.tab_widget.setTabText(1, tr("annotation_tab"))
+            self.tab_widget.setTabText(2, tr("datasets_tab"))
+            self.tab_widget.setTabText(3, tr("history_tab"))
+
+            # Mettre à jour les menus (IMPORTANT!)
+            self._update_menus()
+            self._update_menu_actions()  # Ajoutez cette ligne !
+
+            # Mettre à jour la barre d'état
+            self.update_status(tr("status.ready"))
+
+            # Mettre à jour le sous-titre
+            subtitle_label = self.findChild(QtWidgets.QLabel, "subtitle_label")
+            if subtitle_label:
+                subtitle_label.setText(tr("app_title"))
+
+            # Actualiser tous les widgets
+            self._notify_language_change()
+
+            # Sauvegarder
+            settings = QSettings("Liris", "IACollaborative")
+            settings.setValue("language", language_code)
+
+            # Informer les widgets enfants
+            self._notify_language_change()
+
+    def _notify_language_change(self):
+        """Notifie les widgets enfants du changement de langue"""
+        # Informer les panneaux principaux
+        for panel in [self.brainstorming_panel, self.annotation_form,
+                      self.dataset_table, self.prompt_list]:
+            if hasattr(panel, 'update_language'):
+                panel.update_language()
+
+    def _on_change_language(self):
+        """Ouvre le sélecteur de langue"""
+        selector = LanguageSelector(self)
+
+        # Sélectionner la langue actuelle
+        languages = translator.get_available_languages()
+        for i in range(selector.language_combo.count()):
+            if selector.language_combo.itemData(i) == translator.current_language:
+                selector.language_combo.setCurrentIndex(i)
+                break
+
+        if selector.exec_() == QtWidgets.QDialog.Accepted:
+            selected_language = selector.get_selected_language()
+            self.change_language(selected_language)
 
     def _restore_settings(self):
         """Restaure les paramètres utilisateur"""
@@ -503,10 +506,13 @@ class MainWindow(QMainWindow):
         # Autres paramètres spécifiques
         settings.setValue("lastExportPath", self.last_export_path)
 
+        # ✓ AJOUTER LA SAUVEGARDE DE LA LANGUE
+        settings.setValue("language", translator.current_language)
+
     def _init_system(self):
         """Initialise le système d'IA et les composants principaux"""
         try:
-            self.update_status("Initialisation du système...")
+            self.update_status(tr("status.system_connecting"))
             self.update_connection_status("connecting")
             self.progress_bar.setVisible(True)
             self.progress_bar.setValue(10)
@@ -517,8 +523,8 @@ class MainWindow(QMainWindow):
 
             # Initialiser la base de données
             db_config = self.config_provider.get_database_config()
-            self.database = Database(db_config)
-            self.database.connect()  # Remplacé initialize() par connect()
+            self.database = Database(db_config['path'])  # Passer uniquement le chemin
+            self.database.connect()
             self.progress_bar.setValue(40)
 
             # Initialiser l'exportateur
@@ -541,7 +547,7 @@ class MainWindow(QMainWindow):
 
             # Terminer l'initialisation
             QTimer.singleShot(500, lambda: self.progress_bar.setVisible(False))
-            self.update_status("Système initialisé")
+            self.update_status(tr("status.system_initialized"))
             self.update_connection_status("connected")
 
         except Exception as e:
@@ -569,9 +575,9 @@ class MainWindow(QMainWindow):
 
         # Mettre à jour l'étiquette de plateforme
         if platforms:
-            self.platform_label.setText(f"{len(platforms)} plateformes disponibles")
+            self.platform_label.setText(tr("messages.platforms_available", count=len(platforms)))
         else:
-            self.platform_label.setText("Aucune plateforme disponible")
+            self.platform_label.setText(tr("messages.no_platforms"))
 
         # Mettre à jour les widgets
         self.brainstorming_panel.set_conductor(self.conductor)
@@ -614,10 +620,10 @@ class MainWindow(QMainWindow):
         }
 
         text_map = {
-            'connected': 'Système connecté',
-            'connecting': 'Connexion en cours...',
+            'connected': tr("status.system_connected"),
+            'connecting': tr("status.system_connecting"),
             'disconnected': 'Système déconnecté',
-            'error': 'Erreur de connexion'
+            'error': tr("status.system_error")
         }
 
         self.connection_indicator.setStyleSheet(f"""
@@ -1170,7 +1176,7 @@ class MainWindow(QMainWindow):
             logo_label.setStyleSheet(f"""
                 font-size: 32px;
                 font-weight: bold;
-                color: {self.primary_color};
+                color: {Theme.PRIMARY_COLOR};
             """)
         logo_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(logo_label)
@@ -1345,42 +1351,3 @@ class MainWindow(QMainWindow):
 
         # Accepter l'événement
         event.accept()
-
-
-def main():
-    print("\n=== DÉMARRAGE DE L'APPLICATION ===")
-    print(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"Version PyQt5: {QtCore.QT_VERSION_STR}")
-    print(f"Répertoire actuel: {os.getcwd()}")
-
-    try:
-        # Créer l'application
-        print("1. Création de QApplication...")
-        app = QApplication(sys.argv)
-        print("   ✓ QApplication créée")
-
-        # Créer la fenêtre principale
-        print("2. Création de la fenêtre principale...")
-        window = MainWindow()
-        print("   ✓ Fenêtre principale créée")
-
-        # Afficher la fenêtre
-        print("3. Affichage de la fenêtre...")
-        window.show()
-        print("   ✓ Fenêtre affichée")
-
-        # Démarrer la boucle d'événements
-        print("4. Démarrage de la boucle d'événements...")
-        print("=== APPLICATION EN COURS D'EXÉCUTION ===")
-        sys.exit(app.exec_())
-
-    except Exception as e:
-        print(f"\n=== ERREUR CRITIQUE ===")
-        print(f"Erreur: {str(e)}")
-        traceback.print_exc()
-        logger.critical(f"Erreur critique lors du démarrage: {str(e)}", exc_info=True)
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
